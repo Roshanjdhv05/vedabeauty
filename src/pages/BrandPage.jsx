@@ -7,6 +7,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProductsByBrand } from '../services/productService';
 import ProductCard from '../components/ui/ProductCard';
+import { supabase } from '../lib/supabase';
 
 /* ─────────────────────────────────────────────────
    CONSTANTS & DESIGN SYSTEM
@@ -110,7 +111,7 @@ const BrandHero = ({ brandData, productCount, onBack }) => {
   );
 };
 
-const CategoryScroller = ({ categories, onSelect }) => (
+const CategoryScroller = ({ categories, onSelect, categoryImages }) => (
   <section className="mt-6">
     <SectionHeader icon={Sparkles} title="Shop by Category" accentClass="text-[#D4AF37]" />
     <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-4 items-start">
@@ -124,7 +125,7 @@ const CategoryScroller = ({ categories, onSelect }) => (
         >
           <div className="aspect-square w-full rounded-2xl bg-white flex items-center justify-center overflow-hidden border border-[#F8C8DC]/30 shadow-sm p-4 transition-all hover:border-[#F8C8DC] hover:shadow-md">
             <img 
-              src={CATEGORY_IMAGES[cat] ?? CATEGORY_IMAGES.Face} 
+              src={categoryImages[cat] ?? DEFAULT_CATEGORY_IMAGES[cat] ?? DEFAULT_CATEGORY_IMAGES.Face} 
               alt={cat}
               className="w-full h-full object-cover rounded-xl transition-transform duration-500 hover:scale-110"
             />
@@ -152,6 +153,34 @@ const BrandPage = () => {
   const [vfmTab,      setVfmTab]      = useState(299);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerRow, setItemsPerRow] = useState(2);
+  const [categoryImages, setCategoryImages] = useState({});
+
+  useEffect(() => {
+    const fetchCategoryImages = async () => {
+      try {
+        // ONLY fetch categories for THIS specific brand
+        const { data, error } = await supabase
+          .from('category_settings')
+          .select('name, image_url')
+          .eq('brand_id', id)
+          .eq('is_active', true);
+
+        if (error) throw error;
+
+        console.log('Categories found for this brand:', data);
+
+        const imgMap = data.reduce((acc, curr) => {
+          acc[curr.name] = curr.image_url;
+          return acc;
+        }, {});
+
+        setCategoryImages(imgMap);
+      } catch (err) {
+        console.error('Error fetching brand category images:', err);
+      }
+    };
+    if (id) fetchCategoryImages();
+  }, [id]);
 
   // Detect items per row for "7 rows" calculation
   useEffect(() => {
@@ -185,9 +214,9 @@ const BrandPage = () => {
   const brandData = allProducts[0]?.brands ?? null;
   const brandName = brandData?.name ?? 'Brand';
 
-  const uniqueCats = ['All', ...Array.from(
-    new Set(allProducts.map(p => p.category || 'Other'))
-  ).sort()];
+  // Only show categories explicitly added by admin in database
+  const explicitCats = Object.keys(categoryImages).sort();
+  const uniqueCats = ['All', ...explicitCats];
 
   const trending    = allProducts.slice(0, 10);
   const bestSellers = [...allProducts]
@@ -249,9 +278,9 @@ const BrandPage = () => {
         onBack={() => navigate(-1)} 
       />
 
-      {/* 2. SHOP BY CATEGORY */}
-      {uniqueCats.length > 2 && (
-        <CategoryScroller categories={uniqueCats} onSelect={handleCategorySelect} />
+      {/* 2. SHOP BY CATEGORY (Only show if admin has configured categories) */}
+      {explicitCats.length > 0 && (
+        <CategoryScroller categories={uniqueCats} onSelect={handleCategorySelect} categoryImages={categoryImages} />
       )}
 
       {/* 3. TRENDING NOW */}

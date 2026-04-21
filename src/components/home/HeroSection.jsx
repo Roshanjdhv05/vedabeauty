@@ -1,64 +1,53 @@
-import React from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-
-const banners = [
-  {
-    id: 1,
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=1200',
-    title: 'Glow Like Never Before',
-    subtitle: 'upto 40% OFF on Premium Skincare',
-    buttonText: 'Shop Now'
-  },
-  {
-    id: 2,
-    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200',
-    title: 'Luxury Fragrances',
-    subtitle: 'New Collection Just Arrived',
-    buttonText: 'Explore'
-  },
-  {
-    id: 3,
-    image: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=1200',
-    title: 'Organic Makeup',
-    subtitle: 'Chemical Free, Pure Beauty',
-    buttonText: 'View Details'
-  }
-];
+// The single hero image — reduced to 800w for fastest load
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=75&w=800';
 
 const HeroSection = () => {
+  // Preload the hero image as soon as the component is mounted
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = HERO_IMAGE;
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
+  }, []);
+
   return (
     <div className="relative w-full h-[500px] md:h-[650px] overflow-hidden">
-      {/* Background Image with Darker Overlay */}
-      <img 
-        src="https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=1600" 
-        alt="Veda Beauty Wholesale" 
+      {/* Hero Image — native img with highest fetch priority */}
+      <img
+        src={HERO_IMAGE}
+        alt="Veda Beauty Wholesale"
+        fetchpriority="high"
+        decoding="async"
         className="w-full h-full object-cover"
+        style={{ display: 'block' }}
       />
+
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/40 z-10" />
+
       {/* Content Overlay */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
           className="max-w-xs md:max-w-3xl"
         >
           <span className="text-[10px] md:text-sm font-sans font-bold text-accent tracking-[0.4em] uppercase mb-4 block">
             Business Ready Shipping
           </span>
           <h1 className="text-3xl md:text-7xl font-serif font-bold text-white mb-6 leading-[1.1]">
-            Fast Global Dispatch <br className="hidden md:block" /> & Bulk Loyalty
+            Fast Global Dispatch <br className="hidden md:block" /> &amp; Bulk Loyalty
           </h1>
           <p className="text-xs md:text-lg text-white/70 mb-10 max-w-md mx-auto font-sans leading-relaxed">
             Priority shipping within 24 hours for all professional orders. Scale your business with our dedicated support.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button className="w-full sm:w-auto px-10 py-4 bg-accent text-black text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg hover:scale-105 transition-transform shadow-xl">
               Learn More
@@ -86,3 +75,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+

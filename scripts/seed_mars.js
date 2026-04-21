@@ -228,12 +228,20 @@ async function seed() {
 
     console.log(`Inserting ${productsToInsert.length} products...`);
 
-    // 3. Batch Insert (Supabase handles batching automatically)
+    // 3. Batch Upsert (Using name and brand_id as conflict targets)
     const { error: pError } = await supabase
       .from('products')
-      .insert(productsToInsert);
+      .upsert(productsToInsert, { onConflict: 'name, brand_id' });
 
-    if (pError) throw pError;
+    if (pError) {
+      if (pError.code === '42P10') {
+        console.warn("No unique constraint on 'name, brand_id'. Falling back to normal insert...");
+        const { error: insertError } = await supabase.from('products').insert(productsToInsert);
+        if (insertError) throw insertError;
+      } else {
+        throw pError;
+      }
+    }
     
     console.log("--- SEEDING COMPLETE ---");
     process.exit(0);

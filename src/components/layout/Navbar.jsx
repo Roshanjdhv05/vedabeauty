@@ -23,8 +23,7 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: 'Shop All', path: '/', icon: <LayoutGrid size={18} /> },
-    { name: 'Wholesale Deals', path: '/', icon: <Package size={18} /> },
+    { name: 'Categories', path: '/categories', icon: <LayoutGrid size={18} /> },
     { name: 'About Veda', path: '/', icon: <Info size={18} /> },
     { name: 'Contact Us', path: '/', icon: <PhoneCall size={18} /> },
   ];
@@ -61,6 +60,19 @@ const Navbar = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-accent transition-colors" size={18} />
+        </div>
+
+        {/* Desktop Nav Links */}
+        <div className="hidden lg:flex items-center gap-8 mx-6">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name} 
+              to={link.path} 
+              className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 hover:text-accent transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
         </div>
 
         {/* Actions */}

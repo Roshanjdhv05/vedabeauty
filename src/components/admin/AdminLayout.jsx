@@ -10,7 +10,8 @@ import {
   ChevronRight,
   ShieldCheck,
   TrendingUp,
-  MessageSquare
+  MessageSquare,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -22,6 +23,7 @@ const AdminLayout = ({ children }) => {
     { name: 'Overview', icon: <LayoutDashboard size={20} />, path: '/admin/overview' },
     { name: 'Products', icon: <Package size={20} />, path: '/admin/products' },
     { name: 'Orders', icon: <ShoppingCart size={20} />, path: '/admin/orders' },
+    { name: 'Categories Banner', icon: <ImageIcon size={20} />, path: '/admin/category-images' },
     { name: 'Customers', icon: <Users size={20} />, path: '/admin/customers' },
     { name: 'Messages', icon: <MessageSquare size={20} />, path: '/admin/messages' },
   ];

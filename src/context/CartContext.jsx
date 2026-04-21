@@ -70,6 +70,14 @@ export const CartProvider = ({ children }) => {
   }, [cart, user]);
 
   const addToCart = async (product) => {
+    // Guard: if user is not logged in, redirect to login page
+    if (!user) {
+      // Store the intended destination so we can redirect back after login
+      sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+      window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+      return;
+    }
+
     // 1. Optimistically update local state immediately
     const existing = cart.find((item) => item.id === product.id);
     const newQuantity = existing ? existing.quantity + 1 : 1;
@@ -83,18 +91,14 @@ export const CartProvider = ({ children }) => {
       return [...prev, { ...product, quantity: 1 }];
     });
 
-    // 2. Sync with DB in background if user is logged in
-    if (user) {
-      try {
-        const { error } = await addToDBCart(user.id, product.id, newQuantity);
-        if (error) {
-          console.warn('Cart DB Sync failed (Check RLS policies):', error.message);
-          // We don't revert local state here to avoid jitter, 
-          // but we log it for the developer to see in the console.
-        }
-      } catch (e) {
-        console.error('Cart DB Sync Exception:', e);
+    // 2. Sync with DB in background
+    try {
+      const { error } = await addToDBCart(user.id, product.id, newQuantity);
+      if (error) {
+        console.warn('Cart DB Sync failed (Check RLS policies):', error.message);
       }
+    } catch (e) {
+      console.error('Cart DB Sync Exception:', e);
     }
   };
 

@@ -13,6 +13,7 @@ import {
   getRecommendedProducts
 } from '../services/productService';
 import { getMarsImages } from '../lib/marsImages';
+import OptimizedImage from '../components/ui/OptimizedImage';
 import ProductCard from '../components/ui/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
@@ -244,14 +245,9 @@ const ProductDetails = () => {
               >
                 {productImages.map((img, i) => (
                   <SwiperSlide key={i}>
-                    <img
+                    <OptimizedImage
                       src={img}
                       alt={`${product.name} view ${i + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=800';
-                      }}
                     />
                   </SwiperSlide>
                 ))}
@@ -288,14 +284,9 @@ const ProductDetails = () => {
                         : 'border-transparent opacity-60 hover:opacity-100 hover:border-gray-300'
                     }`}
                   >
-                    <img
+                    <OptimizedImage
                       src={img}
                       alt={`thumb ${i + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=200';
-                      }}
                     />
                   </button>
                 ))}

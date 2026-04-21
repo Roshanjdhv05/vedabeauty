@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getBrands } from '../../services/productService';
+import OptimizedImage from '../ui/OptimizedImage';
 
 const ShopByBrand = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const ShopByBrand = () => {
   if (loading) return null;
 
   return (
-    <section className="pt-10 pb-6 bg-background">
+    <section className="pt-2 pb-2 bg-background">
       <div className="max-w-7xl mx-auto px-4 overflow-hidden">
         <div className="mb-6">
           <h2 className="text-2xl font-serif font-bold text-black">Brands We Carry</h2>
@@ -46,7 +47,12 @@ const ShopByBrand = () => {
                       : 'rounded-full border-[1.5px] border-[#E8B4C0] bg-[#FDEEF4] p-4'
                 }`}>
                   {hasCustomLogo ? (
-                    <img src={brand.logo_url} alt={brand.name} className="w-full h-full object-contain rounded-full" />
+                    <OptimizedImage 
+                      src={brand.logo_url} 
+                      alt={brand.name} 
+                      containerClassName="rounded-full"
+                      className="object-contain"
+                    />
                   ) : isMars ? (
                     <div className="text-white font-bold text-center">
                        <p className="text-xl tracking-tighter">MARS</p>

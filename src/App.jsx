@@ -11,6 +11,9 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
+import DealsPage from './pages/DealsPage';
+import CategoryPage from './pages/CategoryPage';
+import CategoryResults from './pages/CategoryResults';
 
 
 // Admin Imports
@@ -19,6 +22,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminOverview from './pages/admin/AdminOverview';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminCategoryImages from './pages/admin/AdminCategoryImages';
 
 const AppContent = () => {
   const location = useLocation();
@@ -39,6 +43,7 @@ const AppContent = () => {
           <Route path="/admin/overview" element={<AdminOverview />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/category-images" element={<AdminCategoryImages />} />
         </Routes>
       </AdminLayout>
     );
@@ -57,6 +62,9 @@ const AppContent = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/deals" element={<DealsPage />} />
+        <Route path="/categories" element={<CategoryPage />} />
+        <Route path="/category/:categoryName" element={<CategoryResults />} />
 
       </Routes>
     </MainLayout>

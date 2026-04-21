@@ -7,7 +7,7 @@ import ValueForMoney from '../components/home/ValueForMoney';
 import WholesaleCTA from '../components/home/WholesaleCTA';
 import ProductCard from '../components/ui/ProductCard';
 import { getProducts } from '../services/productService';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 
 const Home = () => {
   const [allProducts, setAllProducts] = useState([]);
@@ -54,19 +54,27 @@ const Home = () => {
       {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. SHOP BY CATEGORY */}
+      {/* 2. SHOP BY CATEGORY (Circles) */}
       <ShopByCategory />
 
-      {/* 3. SHOP BY BRAND */}
+      {/* 3. SHOP BY BRAND (Boxes) */}
       <ShopByBrand />
 
       {/* 5. PRODUCT SECTIONS */}
-      <div className="space-y-0">
+      <div className="space-y-12 max-w-7xl mx-auto px-4 py-10">
         {/* Just Launched / Trending */}
-        <div className="pb-6 pt-0">
-          <div className="max-w-7xl mx-auto px-4 flex justify-between items-end mb-4">
-             <h2 className="text-2xl md:text-3xl font-serif font-bold text-black">Just Launched</h2>
-             <button className="text-[10px] font-bold uppercase tracking-widest text-accent border-b border-accent pb-1">View All</button>
+        <div>
+          <div className="flex justify-between items-end mb-6">
+             <div>
+               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Just Launched</h2>
+               <p className="text-sm text-gray-400 mt-1">Discover our latest professional additions</p>
+             </div>
+             <button 
+              onClick={() => navigate('/categories')}
+              className="text-[10px] font-bold uppercase tracking-widest text-accent border-b-2 border-accent pb-1"
+             >
+               View All
+             </button>
           </div>
           {loading ? (
             <div className="h-64 flex items-center justify-center text-gray-400">Loading...</div>
@@ -76,35 +84,27 @@ const Home = () => {
         </div>
 
         {/* Luxury Selection */}
-        <div className="py-6">
-          <div className="max-w-7xl mx-auto px-4 mb-4">
-             <h2 className="text-2xl font-serif font-bold text-black">Luxury Selection</h2>
+        <div>
+          <div className="mb-6">
+             <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Luxury Selection</h2>
+             <p className="text-sm text-gray-400 mt-1">Premium products for professional results</p>
           </div>
           {loading ? null : (
             <ProductSection products={allProducts.filter(p => p.price > 800).slice(0, 10)} />
           )}
         </div>
 
-        {/* Top Selling */}
-        <div className="py-6">
-          <div className="max-w-7xl mx-auto px-4 mb-4">
-             <h2 className="text-2xl font-serif font-bold text-black">Top Selling</h2>
+        <ValueForMoney onFilterChange={handlePriceFilter} />
+        
+        <div>
+          <div className="mb-6">
+             <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Great Deals</h2>
+             <p className="text-sm text-gray-400 mt-1">Professional quality, wholesale prices</p>
           </div>
           {loading ? null : (
-            <ProductSection products={allProducts.slice(4, 14)} />
+            <ProductSection products={filteredProducts.slice(0, 10)} />
           )}
         </div>
-      </div>
-
-      <ValueForMoney onFilterChange={handlePriceFilter} />
-      
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 mb-4">
-           <h2 className="text-2xl font-serif font-bold text-black">Great Deals</h2>
-        </div>
-        {loading ? null : (
-          <ProductSection products={filteredProducts.slice(0, 10)} />
-        )}
       </div>
 
       {/* 7. ALL PRODUCTS SECTION */}
