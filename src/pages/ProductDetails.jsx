@@ -17,6 +17,7 @@ import OptimizedImage from '../components/ui/OptimizedImage';
 import ProductCard from '../components/ui/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import ProductReviews from '../components/product/ProductReviews';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -85,6 +86,7 @@ const ProductDetails = () => {
   const [product, setProduct]           = useState(null);
   const [similar, setSimilar]           = useState([]);
   const [recommended, setRecommended]   = useState([]);
+  const [reviews, setReviews]           = useState([]);
   const [loading, setLoading]           = useState(true);
   const [simLoading, setSimLoading]     = useState(true);
   const [recLoading, setRecLoading]     = useState(true);
@@ -107,15 +109,17 @@ const ProductDetails = () => {
       setLoading(false);
 
       if (data) {
-        // fetch similar (same brand) and recommended in parallel
-        const [sim, rec] = await Promise.all([
+        // fetch similar, recommended, and reviews in parallel
+        const [sim, rec, revs] = await Promise.all([
           getSimilarProducts(data.brand_id, data.id, 10),
           getRecommendedProducts(data.id, 10),
+          import('../services/reviewService').then(m => m.getProductReviews(data.id))
         ]);
         setSimilar(sim);
         setSimLoading(false);
         setRecommended(rec);
         setRecLoading(false);
+        setReviews(revs);
       } else {
         setSimLoading(false);
         setRecLoading(false);
@@ -123,6 +127,10 @@ const ProductDetails = () => {
     };
     run();
   }, [id]);
+
+  const avgRating = reviews.length > 0 
+    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+    : "4.5"; // Fallback to a nice default if no reviews yet
 
   const handleAddToCart = useCallback(() => {
     addToCart(product);
@@ -214,15 +222,18 @@ const ProductDetails = () => {
   return (
     <div className="bg-white pb-28 md:pb-12 min-h-screen">
 
-      {/* ─── Mobile top nav ─── */}
-      <div className="md:hidden sticky top-16 z-40 bg-white/90 backdrop-blur-md px-4 py-2 flex items-center justify-between border-b border-gray-100">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-          <ArrowLeft className="w-5 h-5" />
+      {/* ─── Mobile top floating nav ─── */}
+      <div className="md:hidden absolute top-20 left-0 w-full z-40 px-4 flex items-center justify-between pointer-events-none">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="p-2.5 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-gray-100 transition-all active:scale-90 pointer-events-auto"
+        >
+          <ArrowLeft className="w-5 h-5 text-black" />
         </button>
-        <span className="text-sm font-semibold text-gray-700 line-clamp-1 max-w-[180px]">{product.name}</span>
+        
         <button
           onClick={() => toggleWishlist(product)}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2.5 rounded-full bg-white/80 backdrop-blur-md shadow-sm border border-gray-100 transition-all active:scale-90 pointer-events-auto"
         >
           <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
         </button>
@@ -319,11 +330,19 @@ const ProductDetails = () => {
 
             {/* Rating */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center gap-1 bg-green-50 px-2.5 py-1 rounded-lg">
-                <span className="text-green-700 font-bold text-sm">4.5</span>
+              <button 
+                onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex items-center gap-1 bg-green-50 px-2.5 py-1 rounded-lg hover:bg-green-100 transition-colors"
+              >
+                <span className="text-green-700 font-bold text-sm">{avgRating}</span>
                 <Star className="w-4 h-4 fill-green-700 text-green-700" />
-              </div>
-              <span className="text-gray-400 text-sm">842 Reviews</span>
+              </button>
+              <button 
+                onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-gray-400 text-sm hover:text-black transition-colors"
+              >
+                {reviews.length} {reviews.length === 1 ? 'Review' : 'Reviews'}
+              </button>
             </div>
 
             {/* Price */}
@@ -413,6 +432,11 @@ const ProductDetails = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ─── Product Reviews ─── */}
+      <div id="reviews-section">
+        <ProductReviews productId={product.id} />
       </div>
 
       {/* ─── Similar Products (same brand) ─── */}

@@ -13,7 +13,7 @@ const PriceFilters = () => {
   return (
     <section className="py-8 bg-background">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {filters.map((filter, i) => (
             <motion.div
               key={filter.label}

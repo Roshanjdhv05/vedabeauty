@@ -7,9 +7,11 @@ import ValueForMoney from '../components/home/ValueForMoney';
 import WholesaleCTA from '../components/home/WholesaleCTA';
 import ProductCard from '../components/ui/ProductCard';
 import { getProducts } from '../services/productService';
+import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,14 +56,14 @@ const Home = () => {
       {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. SHOP BY CATEGORY (Circles) */}
+      {/* 2. SHOP BY CATEGORY */}
       <ShopByCategory />
 
-      {/* 3. SHOP BY BRAND (Boxes) */}
+      {/* 3. SHOP BY BRAND */}
       <ShopByBrand />
 
       {/* 5. PRODUCT SECTIONS */}
-      <div className="space-y-12 max-w-7xl mx-auto px-4 py-10">
+      <div className="space-y-10 md:space-y-20 max-w-7xl mx-auto px-4 py-10">
         {/* Just Launched / Trending */}
         <div>
           <div className="flex justify-between items-end mb-6">
@@ -77,9 +79,13 @@ const Home = () => {
              </button>
           </div>
           {loading ? (
-            <div className="h-64 flex items-center justify-center text-gray-400">Loading...</div>
+            <div className="flex gap-4 overflow-hidden">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
+              ))}
+            </div>
           ) : (
-            <ProductSection products={allProducts.slice(0, 10)} />
+            <ProductSection products={allProducts?.slice(0, 10) || []} />
           )}
         </div>
 
@@ -89,8 +95,14 @@ const Home = () => {
              <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Luxury Selection</h2>
              <p className="text-sm text-gray-400 mt-1">Premium products for professional results</p>
           </div>
-          {loading ? null : (
-            <ProductSection products={allProducts.filter(p => p.price > 800).slice(0, 10)} />
+          {loading ? (
+            <div className="flex gap-4 overflow-hidden">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
+              ))}
+            </div>
+          ) : (
+            <ProductSection products={allProducts?.filter(p => p.price > 800).slice(0, 10) || []} />
           )}
         </div>
 
@@ -101,8 +113,14 @@ const Home = () => {
              <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Great Deals</h2>
              <p className="text-sm text-gray-400 mt-1">Professional quality, wholesale prices</p>
           </div>
-          {loading ? null : (
-            <ProductSection products={filteredProducts.slice(0, 10)} />
+          {loading ? (
+            <div className="flex gap-4 overflow-hidden">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
+              ))}
+            </div>
+          ) : (
+            <ProductSection products={filteredProducts?.slice(0, 10) || []} />
           )}
         </div>
       </div>
@@ -115,16 +133,20 @@ const Home = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 max-w-7xl mx-auto px-4">
-             {[1,2,3,4,5,6,7,8,9,10].map(i => <div key={i} className="aspect-[3/4] bg-white/50 animate-pulse rounded-2xl" />)}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto px-4">
+             {[1,2,3,4,5,6,7,8,9,10].map(i => <div key={i} className="aspect-[3/4] bg-white/30 animate-pulse rounded-2xl" />)}
           </div>
         ) : (
           <div className="max-w-7xl mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
-              {pagedProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {pagedProducts?.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 mb-12">
+                {pagedProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <div className="py-20 text-center text-gray-400">No products found</div>
+            )}
 
             {/* Pagination UI */}
             {totalPages > 1 && (
@@ -140,7 +162,6 @@ const Home = () => {
                 <div className="flex gap-2 items-center">
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
-                    // Logic to show 1, 2, ..., last or adjacent pages
                     if (
                       page === 1 || 
                       page === totalPages || 
@@ -180,7 +201,7 @@ const Home = () => {
             )}
             
             <p className="mt-8 text-center text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">
-              Page {currentPage} of {totalPages} &bull; Total {allProducts.length} Products
+              Page {currentPage} of {totalPages} &bull; Total {allProducts?.length || 0} Products
             </p>
           </div>
         )}

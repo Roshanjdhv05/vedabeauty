@@ -40,7 +40,6 @@ const ShopByCategory = () => {
     fetchCategories();
   }, []);
 
-  if (loading) return null;
   return (
     <section className="pt-4 pb-2 bg-background">
       <div className="max-w-7xl mx-auto px-4 overflow-hidden">
@@ -49,38 +48,50 @@ const ShopByCategory = () => {
         </h2>
         
         <div className="flex gap-3 overflow-x-auto no-scrollbar pb-6 -mx-4 px-4">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.name}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              viewport={{ once: true }}
-              className="flex-shrink-0 flex flex-col items-center group cursor-pointer"
-              onClick={() => navigate(`/category/${cat.name}`)}
-            >
-              <div className="relative w-[70px] h-[70px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20">
-                <OptimizedImage 
-                  src={cat.image_url} 
-                  alt={cat.name} 
-                />
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+          {loading ? (
+            // Skeleton Loader
+            [1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex-shrink-0 flex flex-col items-center">
+                <div className="w-[70px] h-[70px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] bg-white/20 animate-pulse" />
+                <div className="w-12 h-2 bg-white/20 animate-pulse mt-2 rounded" />
               </div>
-              <span className="mt-2 text-[8px] md:text-sm font-bold text-black/60 uppercase tracking-widest text-center max-w-[70px] leading-tight">
-                {cat.name}
-              </span>
-            </motion.div>
-          ))}
+            ))
+          ) : (
+            categories.map((cat, i) => (
+              <motion.div
+                key={cat.name}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                viewport={{ once: true }}
+                className="flex-shrink-0 flex flex-col items-center group cursor-pointer"
+                onClick={() => navigate(`/category/${cat.name}`)}
+              >
+                <div className="relative w-[70px] h-[70px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20">
+                  <OptimizedImage 
+                    src={cat.image_url} 
+                    alt={cat.name} 
+                  />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                </div>
+                <span className="mt-2 text-[8px] md:text-sm font-bold text-black/60 uppercase tracking-widest text-center max-w-[70px] leading-tight">
+                  {cat.name}
+                </span>
+              </motion.div>
+            ))
+          )}
         </div>
         
-        <div className="text-center mt-[-1rem]">
-          <button 
-            onClick={() => navigate('/categories')}
-            className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#333] border-b border-black/20 pb-1 hover:border-black transition-all"
-          >
-            Shop Now
-          </button>
-        </div>
+        {!loading && (
+          <div className="text-center mt-[-1rem]">
+            <button 
+              onClick={() => navigate('/categories')}
+              className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#333] border-b border-black/20 pb-1 hover:border-black transition-all"
+            >
+              Shop Now
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
