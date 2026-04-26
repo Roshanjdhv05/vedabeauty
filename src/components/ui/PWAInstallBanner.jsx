@@ -81,7 +81,7 @@ const PWAInstallBanner = () => {
           <div className="bg-white rounded-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-black/5 p-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center overflow-hidden border border-black/5 flex-shrink-0">
-                <img src="/favicon.jpeg" alt="Logo" className="w-full h-full object-cover" />
+                <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
               </div>
               <div className="flex flex-col">
                 <h3 className="text-sm font-bold text-gray-900 leading-tight">Install Veda Beauty</h3>
