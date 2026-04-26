@@ -78,7 +78,7 @@ const ShopByBrand = () => {
             })
           )}
           {/* Spacer for scroll-end on mobile */}
-          <div className="w-10 md:w-0 flex-shrink-0" />
+          <div className="w-16 md:w-0 flex-shrink-0" />
         </div>
       </div>
     </section>

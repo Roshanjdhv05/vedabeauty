@@ -1,10 +1,9 @@
-const CACHE_NAME = 'veda-beauty-v1';
+const CACHE_NAME = 'veda-beauty-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/favicon.jpeg',
-  // Static assets will be cached on fetch
+  '/manifest.json?v=5',
+  '/logo.jpeg?v=5'
 ];
 
 self.addEventListener('install', (event) => {

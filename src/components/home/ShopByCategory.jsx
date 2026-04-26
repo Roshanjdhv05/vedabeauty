@@ -47,13 +47,13 @@ const ShopByCategory = () => {
           Shop by Category
         </h2>
         
-        <div className="flex gap-3 overflow-x-auto no-scrollbar pb-6 -mx-4 px-4">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar pb-6 px-4">
           {loading ? (
             // Skeleton Loader
             [1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex-shrink-0 flex flex-col items-center">
-                <div className="w-[70px] h-[70px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] bg-white/20 animate-pulse" />
-                <div className="w-12 h-2 bg-white/20 animate-pulse mt-2 rounded" />
+                <div className="w-[80px] h-[80px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] bg-white/20 animate-pulse" />
+                <div className="w-16 h-2 bg-white/20 animate-pulse mt-2 rounded" />
               </div>
             ))
           ) : (
@@ -67,21 +67,19 @@ const ShopByCategory = () => {
                 className="flex-shrink-0 flex flex-col items-center group cursor-pointer"
                 onClick={() => navigate(`/category/${cat.name}`)}
               >
-                <div className="relative w-[70px] h-[70px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20">
+                <div className="relative w-[80px] h-[80px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20">
                   <OptimizedImage 
                     src={cat.image_url} 
                     alt={cat.name} 
                   />
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
                 </div>
-                <span className="mt-2 text-[8px] md:text-sm font-bold text-black/60 uppercase tracking-widest text-center max-w-[70px] leading-tight">
+                <span className="mt-2 text-[10px] md:text-sm font-bold text-black/60 uppercase tracking-widest text-center max-w-[80px] leading-tight">
                   {cat.name}
                 </span>
               </motion.div>
             ))
           )}
-          {/* Spacer for scroll-end on mobile */}
-          <div className="w-4 md:w-0 flex-shrink-0" />
         </div>
         
         {!loading && (

@@ -63,10 +63,10 @@ const Home = () => {
       <ShopByBrand />
 
       {/* 5. PRODUCT SECTIONS */}
-      <div className="space-y-10 md:space-y-20 max-w-7xl mx-auto px-4 py-10">
+      <div className="space-y-10 md:space-y-20 py-10 bg-background">
         {/* Just Launched / Trending */}
-        <div>
-          <div className="flex justify-between items-end mb-6">
+        <div className="w-full">
+          <div className="max-w-7xl mx-auto px-4 flex justify-between items-end mb-6">
              <div>
                <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Just Launched</h2>
                <p className="text-sm text-gray-400 mt-1">Discover our latest professional additions</p>
@@ -79,7 +79,7 @@ const Home = () => {
              </button>
           </div>
           {loading ? (
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex gap-4 overflow-hidden px-4">
               {[1,2,3,4].map(i => (
                 <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
               ))}
@@ -90,13 +90,13 @@ const Home = () => {
         </div>
 
         {/* Luxury Selection */}
-        <div>
-          <div className="mb-6">
+        <div className="w-full">
+          <div className="max-w-7xl mx-auto px-4 mb-6">
              <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Luxury Selection</h2>
              <p className="text-sm text-gray-400 mt-1">Premium products for professional results</p>
           </div>
           {loading ? (
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex gap-4 overflow-hidden px-4">
               {[1,2,3,4].map(i => (
                 <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
               ))}
@@ -106,15 +106,17 @@ const Home = () => {
           )}
         </div>
 
-        <ValueForMoney onFilterChange={handlePriceFilter} />
+        <div className="max-w-7xl mx-auto px-4">
+          <ValueForMoney onFilterChange={handlePriceFilter} />
+        </div>
         
-        <div>
-          <div className="mb-6">
+        <div className="w-full">
+          <div className="max-w-7xl mx-auto px-4 mb-6">
              <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Great Deals</h2>
              <p className="text-sm text-gray-400 mt-1">Professional quality, wholesale prices</p>
           </div>
           {loading ? (
-            <div className="flex gap-4 overflow-hidden">
+            <div className="flex gap-4 overflow-hidden px-4">
               {[1,2,3,4].map(i => (
                 <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
               ))}
