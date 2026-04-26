@@ -25,7 +25,7 @@ const ShopByBrand = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-serif font-bold text-black">Brands We Carry</h2>
         </div>
-        <div className="flex gap-10 md:gap-20 overflow-x-auto no-scrollbar items-center justify-start md:justify-center pb-4">
+        <div className="flex gap-10 md:gap-20 overflow-x-auto no-scrollbar items-center justify-start md:justify-center pb-6 px-4">
           {loading ? (
             // Skeleton Loader
             [1, 2, 3, 4].map((i) => (
@@ -77,8 +77,8 @@ const ShopByBrand = () => {
               );
             })
           )}
-          {/* Spacer for scroll-end on mobile */}
-          <div className="w-16 md:w-0 flex-shrink-0" />
+          {/* Spacer for scroll-end */}
+          <div className="flex-shrink-0 w-16 md:w-0" aria-hidden="true" />
         </div>
       </div>
     </section>

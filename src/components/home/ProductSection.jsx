@@ -3,11 +3,19 @@ import ProductCard from '../ui/ProductCard';
 
 const ProductSection = ({ products }) => {
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Premium Horizontal Slider - Boxed Style to match Brand Page */}
-      <div className="flex overflow-x-auto no-scrollbar gap-3 pb-6 px-4 scroll-smooth">
+    <div className="w-full relative">
+      {/* 
+         Robust Horizontal Slider with Large End-Padding
+         - pl-4: Left padding to align with header
+         - pr-[50%]: MASSIVE right padding to ensure last card can be pulled fully into view
+         - snap-x snap-mandatory: Smooth mobile snapping experience
+      */}
+      <div className="flex overflow-x-auto gap-4 pl-4 pr-[50%] pb-6 scroll-smooth no-scrollbar snap-x snap-mandatory">
         {products.map((product) => (
-          <div key={product.id} className="w-[180px] md:w-[calc((100%-48px)/5)] flex-shrink-0">
+          <div 
+            key={product.id} 
+            className="w-[150px] md:w-[280px] flex-shrink-0 snap-start"
+          >
             <ProductCard product={product} />
           </div>
         ))}
