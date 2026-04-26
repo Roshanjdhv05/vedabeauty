@@ -48,7 +48,7 @@ const ProductCard = ({ product }) => {
       className="bg-white rounded-2xl shadow-sm p-3 flex flex-col h-full group cursor-pointer border border-black/5 hover:shadow-xl transition-all duration-300"
     >
       {/* Image Container */}
-      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-gray-50 mb-3">
+      <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-3">
         <Link to={`/product/${product.id}`} className="block w-full h-full">
           <OptimizedImage 
             src={thumbnail} 
@@ -67,9 +67,11 @@ const ProductCard = ({ product }) => {
           </button>
         </div>
 
-        {product.discount > 0 && (
+        {(product.discount > 0 || (product.mrp_price && product.selling_price && product.mrp_price > product.selling_price)) && (
           <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-red-500 text-white text-[9px] font-bold rounded">
-            {product.discount}% OFF
+            {product.discount > 0 
+              ? product.discount 
+              : Math.round(((product.mrp_price - product.selling_price) / product.mrp_price) * 100)}% OFF
           </div>
         )}
       </div>
@@ -86,9 +88,9 @@ const ProductCard = ({ product }) => {
           {product.name}
         </Link>
         <div className="mt-2 flex items-center gap-2">
-          <span className="text-sm font-bold text-black">₹{product.price}</span>
-          {product.original_price && (
-            <span className="text-[10px] text-gray-400 line-through">₹{product.original_price}</span>
+          <span className="text-sm font-bold text-black">₹{product.selling_price || product.price}</span>
+          {(product.mrp_price || product.original_price) && (
+            <span className="text-[10px] text-gray-400 line-through">₹{product.mrp_price || product.original_price}</span>
           )}
         </div>
 

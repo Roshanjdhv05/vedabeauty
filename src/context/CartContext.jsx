@@ -25,24 +25,46 @@ export const CartProvider = ({ children }) => {
             if (Array.isArray(guestItems) && guestItems.length > 0) {
               // Merge guest items into DB
               for (const item of guestItems) {
-                const existingInDB = dbItems.find(dbi => dbi.product_id === item.id);
+                const existingInDB = dbItems.find(dbi => 
+                  dbi.product_id === item.id && dbi.variant_id === item.variant_id
+                );
                 const newQuantity = existingInDB ? existingInDB.quantity + item.quantity : item.quantity;
-                await addToDBCart(user.id, item.id, newQuantity);
+                await addToDBCart(user.id, item.id, newQuantity, item.variant_id);
               }
               // Clear local storage after successful merge
               localStorage.removeItem('veda_cart');
               // Refresh DB items after merge
               const updatedDBItems = await getCartItems(user.id);
-              setCart(updatedDBItems.map(item => ({ ...(item.products || {}), quantity: item.quantity })));
+              setCart(updatedDBItems.map(item => ({ 
+                ...(item.products || {}), 
+                quantity: item.quantity,
+                variant_id: item.variant_id,
+                variant: item.product_variants
+              })));
             } else {
-              setCart(dbItems.map(item => ({ ...(item.products || {}), quantity: item.quantity })));
+              setCart(dbItems.map(item => ({ 
+                ...(item.products || {}), 
+                quantity: item.quantity,
+                variant_id: item.variant_id,
+                variant: item.product_variants
+              })));
             }
           } catch (e) {
             console.error("Failed to parse local cart:", e);
-            setCart(dbItems.map(item => ({ ...(item.products || {}), quantity: item.quantity })));
+            setCart(dbItems.map(item => ({ 
+              ...(item.products || {}), 
+              quantity: item.quantity,
+              variant_id: item.variant_id,
+              variant: item.product_variants
+            })));
           }
         } else {
-          setCart(dbItems.map(item => ({ ...(item.products || {}), quantity: item.quantity })));
+          setCart(dbItems.map(item => ({ 
+            ...(item.products || {}), 
+            quantity: item.quantity,
+            variant_id: item.variant_id,
+            variant: item.product_variants
+          })));
         }
         setLoading(false);
       } else {
@@ -69,31 +91,32 @@ export const CartProvider = ({ children }) => {
     }
   }, [cart, user]);
 
-  const addToCart = async (product) => {
+  const addToCart = async (product, variantId = null, variant = null) => {
     // Guard: if user is not logged in, redirect to login page
     if (!user) {
-      // Store the intended destination so we can redirect back after login
       sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
       window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
       return;
     }
 
     // 1. Optimistically update local state immediately
-    const existing = cart.find((item) => item.id === product.id);
+    const existing = cart.find((item) => item.id === product.id && item.variant_id === variantId);
     const newQuantity = existing ? existing.quantity + 1 : 1;
 
     setCart((prev) => {
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id && item.variant_id === variantId 
+            ? { ...item, quantity: item.quantity + 1 } 
+            : item
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [...prev, { ...product, quantity: 1, variant_id: variantId, variant }];
     });
 
     // 2. Sync with DB in background
     try {
-      const { error } = await addToDBCart(user.id, product.id, newQuantity);
+      const { error } = await addToDBCart(user.id, product.id, newQuantity, variantId);
       if (error) {
         console.warn('Cart DB Sync failed (Check RLS policies):', error.message);
       }
@@ -102,12 +125,12 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const removeFromCart = async (productId, variantId = null) => {
     if (user) {
-      const { error } = await removeFromDBCart(user.id, productId);
+      const { error } = await removeFromDBCart(user.id, productId, variantId);
       if (error) return;
     }
-    setCart((prev) => prev.filter((item) => item.id !== productId));
+    setCart((prev) => prev.filter((item) => !(item.id === productId && item.variant_id === variantId)));
   };
 
   const clearCart = async () => {
@@ -119,7 +142,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  const cartTotal = cart.reduce((total, item) => {
+    const itemPrice = item.variant?.price || item.price;
+    return total + (itemPrice * item.quantity);
+  }, 0);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, cartCount, cartTotal, loading }}>

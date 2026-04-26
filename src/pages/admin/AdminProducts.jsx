@@ -39,15 +39,26 @@ const AdminProducts = () => {
     category: '',
     price: '',
     image_url: '',
-    description: ''
+    description: '',
+    has_variants: false
   };
   const [productForm, setProductForm] = useState(defaultProductForm);
+  const [productVariants, setProductVariants] = useState([]);
+  const [newVariant, setNewVariant] = useState({
+    name: '',
+    type: 'shade',
+    color_code: '',
+    image_url: '',
+    price: '',
+    stock: 0
+  });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [isSavingBrand, setIsSavingBrand] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingBrandImage, setIsUploadingBrandImage] = useState(false);
   const [registeredBrandObjects, setRegisteredBrandObjects] = useState([]);
   const [editingBrand, setEditingBrand] = useState(null);
+  const [isUploadingVariantImage, setIsUploadingVariantImage] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
@@ -100,14 +111,31 @@ const AdminProducts = () => {
       category: product.category || '',
       price: product.price || '',
       image_url: product.image_url || product.image || '',
-      description: product.description || ''
+      description: product.description || '',
+      has_variants: product.has_variants || false
     });
+    // Fetch variants for this product
+    fetchProductVariants(product.id);
     setIsModalOpen(true);
+  };
+
+  const fetchProductVariants = async (productId) => {
+    try {
+      const { data, error } = await supabase
+        .from('product_variants')
+        .select('*')
+        .eq('product_id', productId);
+      if (error) throw error;
+      setProductVariants(data || []);
+    } catch (error) {
+      console.error('Error fetching variants:', error);
+    }
   };
 
   const handleAddNew = () => {
     setEditingProduct(null);
     setProductForm(defaultProductForm);
+    setProductVariants([]);
     setIsModalOpen(true);
   };
 
@@ -115,15 +143,23 @@ const AdminProducts = () => {
     e.preventDefault();
     setIsSavingProduct(true);
     try {
+      let productId = editingProduct?.id;
       if (editingProduct) {
         const { error } = await supabase.from('products').update(productForm).eq('id', editingProduct.id);
         if (error) throw error;
-        alert('Product updated successfully!');
       } else {
-        const { error } = await supabase.from('products').insert([productForm]);
+        const { data, error } = await supabase.from('products').insert([productForm]).select();
         if (error) throw error;
-        alert('Product added successfully!');
+        productId = data[0].id;
       }
+
+      // Save Variants if enabled
+      if (productForm.has_variants) {
+        const { saveProductVariants } = await import('../../services/productService');
+        await saveProductVariants(productId, productVariants);
+      }
+
+      alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
       setIsModalOpen(false);
       fetchInitialData();
     } catch (error) {
@@ -161,6 +197,31 @@ const AdminProducts = () => {
       alert(`Error uploading image: ${error.message}. Please ensure you have a public storage bucket named 'product-images' in Supabase.`);
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleVariantImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploadingVariantImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `variant_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      
+      setNewVariant({ ...newVariant, image_url: data.publicUrl });
+    } catch (error) {
+      alert(`Error uploading variant image: ${error.message}`);
+    } finally {
+      setIsUploadingVariantImage(false);
     }
   };
 
@@ -476,6 +537,27 @@ const AdminProducts = () => {
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50"
                     />
                   </div>
+
+                  {/* VARIANT TOGGLE - PLACED PROMINENTLY */}
+                  <div className="col-span-2 bg-pink-50/30 p-6 rounded-[2rem] border-2 border-dashed border-pink-200 my-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                          <Tag size={16} className="text-pink-500" />
+                          Enable Product Variants
+                        </h4>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Add Shades, Sizes, or Volume options</p>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => setProductForm({...productForm, has_variants: !productForm.has_variants})}
+                        className={`w-14 h-8 rounded-full transition-all relative ${productForm.has_variants ? 'bg-black' : 'bg-gray-300'}`}
+                      >
+                        <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${productForm.has_variants ? 'left-7' : 'left-1'}`} />
+                      </button>
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-4">Brand Name*</label>
                     <input 
@@ -490,7 +572,7 @@ const AdminProducts = () => {
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50"
                     />
                   </div>
-                  <div>
+                  <div className="col-span-2 md:col-span-1">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-4">Price (₹)*</label>
                     <input 
                       type="number" required value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})}
@@ -532,6 +614,143 @@ const AdminProducts = () => {
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 min-h-[100px] resize-none"
                     />
                   </div>
+
+                  {/* Variant Builder UI */}
+                  {productForm.has_variants && (
+                    <div className="col-span-2 space-y-6">
+                      <div className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm">
+                        <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Variant Builder</h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Variant Name</label>
+                            <input 
+                              type="text" 
+                              placeholder="e.g. L3 Gobi"
+                              value={newVariant.name}
+                              onChange={(e) => setNewVariant({...newVariant, name: e.target.value})}
+                              className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Type</label>
+                            <select 
+                              value={newVariant.type}
+                              onChange={(e) => setNewVariant({...newVariant, type: e.target.value})}
+                              className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                            >
+                              <option value="shade">Shade</option>
+                              <option value="size">Size</option>
+                              <option value="volume">Volume</option>
+                            </select>
+                          </div>
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Stock</label>
+                            <input 
+                              type="number"
+                              value={newVariant.stock}
+                              onChange={(e) => setNewVariant({...newVariant, stock: parseInt(e.target.value) || 0})}
+                              className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                            />
+                          </div>
+                          {newVariant.type === 'shade' && (
+                            <div className="col-span-1">
+                              <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Color Code (Hex)</label>
+                              <div className="flex gap-2">
+                                <input 
+                                  type="text"
+                                  placeholder="#F5CBA7"
+                                  value={newVariant.color_code}
+                                  onChange={(e) => setNewVariant({...newVariant, color_code: e.target.value})}
+                                  className="flex-1 bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                                />
+                                <input 
+                                  type="color"
+                                  value={newVariant.color_code || '#ffffff'}
+                                  onChange={(e) => setNewVariant({...newVariant, color_code: e.target.value})}
+                                  className="w-10 h-10 rounded-lg overflow-hidden border-none cursor-pointer"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Price Override (Optional)</label>
+                            <input 
+                              type="number"
+                              placeholder="Leave blank to use base price"
+                              value={newVariant.price}
+                              onChange={(e) => setNewVariant({...newVariant, price: e.target.value})}
+                              className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Variant Image (Optional)</label>
+                            <div className="flex items-center gap-2">
+                              {newVariant.image_url && (
+                                <div className="w-10 h-10 rounded-lg border border-gray-100 overflow-hidden flex-shrink-0 bg-gray-50">
+                                  <img src={newVariant.image_url} alt="Preview" className="w-full h-full object-cover" />
+                                </div>
+                              )}
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={handleVariantImageUpload}
+                                disabled={isUploadingVariantImage}
+                                className="flex-1 text-[10px] text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:uppercase file:bg-gray-50 file:text-gray-700 cursor-pointer"
+                              />
+                            </div>
+                            {isUploadingVariantImage && <p className="text-[8px] text-accent font-bold mt-1 animate-pulse">Uploading...</p>}
+                          </div>
+                          <div className="col-span-1 flex items-end">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                if (!newVariant.name) return alert('Variant name is required');
+                                setProductVariants([...productVariants, { ...newVariant }]);
+                                setNewVariant({ name: '', type: 'shade', color_code: '', image_url: '', price: '', stock: 0 });
+                              }}
+                              className="w-full bg-black text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
+                            >
+                              Add Variant
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Variants List */}
+                        {productVariants.length > 0 && (
+                          <div className="space-y-3 mt-8 pt-8 border-t border-gray-50">
+                            <h5 className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-4">Current Variants</h5>
+                            {productVariants.map((v, idx) => (
+                              <div key={idx} className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                  <div className="flex items-center gap-3">
+                                  {v.image_url ? (
+                                    <div className="w-10 h-10 rounded-lg border border-gray-200 overflow-hidden">
+                                      <img src={v.image_url} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                  ) : v.color_code && (
+                                    <div className="w-10 h-10 rounded-full border border-gray-200" style={{ backgroundColor: v.color_code }} />
+                                  )}
+                                  <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-gray-900">{v.name}</span>
+                                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
+                                      {v.type} {v.stock !== undefined ? `• Stock: ${v.stock}` : ''} {v.price ? `• ₹${v.price}` : ''}
+                                    </span>
+                                  </div>
+                                </div>
+                                <button 
+                                  type="button"
+                                  onClick={() => setProductVariants(productVariants.filter((_, i) => i !== idx))}
+                                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button 

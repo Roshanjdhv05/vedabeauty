@@ -19,6 +19,7 @@ const OptimizedImage = ({
   loading = 'lazy',
   fallbackSrc = 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=300',
   aspectRatio = 'aspect-square',
+  objectFit = 'contain',
   onClick
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -43,7 +44,7 @@ const OptimizedImage = ({
 
   return (
     <div 
-      className={`relative overflow-hidden ${aspectRatio} ${containerClassName}`}
+      className={`relative overflow-hidden bg-white ${aspectRatio} ${containerClassName}`}
       onClick={onClick}
     >
       {/* Skeleton Loader */}
@@ -52,7 +53,7 @@ const OptimizedImage = ({
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center"
+            className="absolute inset-0 bg-gray-50 animate-pulse flex items-center justify-center"
           >
             <div className="w-10 h-10 border-2 border-gray-200 border-t-gray-400 rounded-full animate-spin" />
           </motion.div>
@@ -70,7 +71,7 @@ const OptimizedImage = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className={`w-full h-full object-cover ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full ${objectFit === 'cover' ? 'object-cover' : 'object-contain'} ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       />
 
       {/* Error Fallback Overlay (Optional hint) */}

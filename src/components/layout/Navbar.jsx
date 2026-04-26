@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useWishlist } from '../../context/WishlistContext';
+import PWAInstallButton from '../ui/PWAInstallButton';
 
 const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -64,6 +65,7 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-8 mx-6">
+          <PWAInstallButton />
           {navLinks.map((link) => (
             <Link 
               key={link.name} 
@@ -159,9 +161,12 @@ const Navbar = () => {
                   <span className="text-xl font-serif font-bold text-white tracking-tighter">VEDA BEAUTY</span>
                   <span className="text-[8px] font-sans font-bold text-accent tracking-[0.2em] uppercase">Professional</span>
                 </div>
-                <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white/10 rounded-full text-white">
-                  <X size={20} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <PWAInstallButton />
+                  <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white/10 rounded-full text-white">
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
 
               <div className="flex-1 overflow-y-auto py-6 px-4">

@@ -163,8 +163,13 @@ const OrderDetails = () => {
                 <div className="flex-1">
                    <div className="flex justify-between items-start">
                       <h4 className="text-sm font-bold text-gray-900 leading-tight">{item.name}</h4>
-                      <span className="text-sm font-bold text-gray-900">₹{item.price}</span>
+                      <span className="text-sm font-bold text-gray-900">₹{item.variant?.price || item.price}</span>
                    </div>
+                   {item.variant && (
+                     <p className="text-[10px] text-accent font-bold uppercase tracking-widest mt-0.5">
+                       {item.variant.name}
+                     </p>
+                   )}
                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Qty: {item.quantity}</p>
                 </div>
              </div>

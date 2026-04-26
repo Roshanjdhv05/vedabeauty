@@ -16,7 +16,7 @@ export const getProducts = async () => {
 export const getProductById = async (id) => {
   const { data, error } = await supabase
     .from('products')
-    .select('*, brands(*)')
+    .select('*, brands(*), product_variants(*)')
     .eq('id', id)
     .single();
 
@@ -59,8 +59,20 @@ export const getBrands = async () => {
 };
 
 export const getProductsByBrand = async (brandId) => {
-  if (brandId && brandId.startsWith('name_')) {
-    const brandName = brandId.replace('name_', '');
+  let actualBrandId = brandId;
+
+  // If brandId is a slug (not a UUID and not a legacy 'name_' polyfill), try to resolve it to an ID first
+  if (brandId && !brandId.startsWith('name_') && !brandId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+    const { data: brand } = await supabase
+      .from('brands')
+      .select('id')
+      .eq('slug', brandId)
+      .single();
+    if (brand) actualBrandId = brand.id;
+  }
+
+  if (actualBrandId && actualBrandId.startsWith('name_')) {
+    const brandName = actualBrandId.replace('name_', '');
     const { data, error } = await supabase
       .from('products')
       .select('*, brands(*)')
@@ -81,10 +93,10 @@ export const getProductsByBrand = async (brandId) => {
   const { data, error } = await supabase
     .from('products')
     .select('*, brands(*)')
-    .eq('brand_id', brandId);
+    .eq('brand_id', actualBrandId);
 
   if (error) {
-    console.error(`Error fetching products for brand ${brandId}:`, error);
+    console.error(`Error fetching products for brand ${actualBrandId}:`, error);
     return [];
   }
   return data;
@@ -95,7 +107,7 @@ export const getProductsByBrand = async (brandId) => {
 export const getCartItems = async (userId) => {
   const { data, error } = await supabase
     .from('cart')
-    .select('*, products(*, brands(name))')
+    .select('*, products(*, brands(name)), product_variants(*)')
     .eq('user_id', userId);
 
   if (error) {
@@ -105,12 +117,19 @@ export const getCartItems = async (userId) => {
   return data;
 };
 
-export const addToDBCart = async (userId, productId, quantity) => {
+export const addToDBCart = async (userId, productId, quantity, variantId = null) => {
+  const upsertData = { 
+    user_id: userId, 
+    product_id: productId, 
+    quantity,
+    variant_id: variantId 
+  };
+
   const { data, error } = await supabase
     .from('cart')
     .upsert(
-      { user_id: userId, product_id: productId, quantity },
-      { onConflict: 'user_id, product_id' }
+      upsertData,
+      { onConflict: 'user_id, product_id, variant_id' }
     )
     .select();
 
@@ -118,11 +137,14 @@ export const addToDBCart = async (userId, productId, quantity) => {
   return { data, error };
 };
 
-export const removeFromDBCart = async (userId, productId) => {
+export const removeFromDBCart = async (userId, productId, variantId = null) => {
+  const matchObj = { user_id: userId, product_id: productId };
+  if (variantId) matchObj.variant_id = variantId;
+
   const { error } = await supabase
     .from('cart')
     .delete()
-    .match({ user_id: userId, product_id: productId });
+    .match(matchObj);
 
   if (error) console.error('Error removing from DB cart:', error);
   return { error };
@@ -201,3 +223,49 @@ export const toggleDBWishlist = async (userId, productId, isAdding) => {
   }
 };
 
+// --- VARIANT SERVICES ---
+
+export const getProductVariants = async (productId) => {
+  const { data, error } = await supabase
+    .from('product_variants')
+    .select('*')
+    .eq('product_id', productId);
+
+  if (error) {
+    console.error('Error fetching product variants:', error);
+    return [];
+  }
+  return data;
+};
+
+export const saveProductVariants = async (productId, variants) => {
+  // First, delete existing variants for this product to replace them
+  const { error: deleteError } = await supabase
+    .from('product_variants')
+    .delete()
+    .eq('product_id', productId);
+
+  if (deleteError) {
+    console.error('Error deleting old variants:', deleteError);
+    return { error: deleteError };
+  }
+
+  if (variants.length === 0) return { data: [] };
+
+  const variantsWithProductId = variants.map(v => {
+    const { id, created_at, ...rest } = v; 
+    return {
+      ...rest,
+      product_id: productId,
+      price: rest.price === '' || rest.price === undefined || rest.price === null ? null : parseFloat(rest.price)
+    };
+  });
+
+  const { data, error } = await supabase
+    .from('product_variants')
+    .insert(variantsWithProductId)
+    .select();
+
+  if (error) console.error('Error saving variants:', error);
+  return { data, error };
+};

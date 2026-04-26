@@ -137,34 +137,44 @@ const CartPage = () => {
                         <div className="flex justify-between items-start gap-2">
                           <h3 className="text-sm md:text-lg font-bold text-black leading-tight line-clamp-2">{item.name}</h3>
                           <button 
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeFromCart(item.id, item.variant_id)}
                             className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                         <p className="text-[10px] text-accent font-bold uppercase tracking-widest mt-1">{item.brand || item.brand_name}</p>
+                        {item.variant && (
+                          <div className="mt-2 flex items-center gap-2">
+                            {item.variant.color_code && (
+                              <div className="w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: item.variant.color_code }} />
+                            )}
+                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                              {item.variant.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex justify-between items-end">
                         <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
                           <button 
-                            onClick={() => removeFromCart(item.id)} // This will need a decrementQuantity instead
+                            onClick={() => removeFromCart(item.id, item.variant_id)} // This will need a decrementQuantity instead, but for now we follow the existing pattern
                             className="p-1.5 hover:bg-white rounded-lg transition-colors"
                           >
                             <Minus className="w-3.5 h-3.5 text-gray-400" />
                           </button>
                           <span className="px-4 font-bold text-xs">{item.quantity}</span>
                           <button 
-                            onClick={() => addToCart(item)}
+                            onClick={() => addToCart(item, item.variant_id, item.variant)}
                             className="p-1.5 hover:bg-white rounded-lg transition-colors"
                           >
                             <Plus className="w-3.5 h-3.5 text-black" />
                           </button>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold">₹{item.price * item.quantity}</p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">₹{item.price} Each</p>
+                          <p className="text-lg font-bold">₹{(item.variant?.price || item.price) * item.quantity}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">₹{item.variant?.price || item.price} Each</p>
                         </div>
                       </div>
                     </div>
