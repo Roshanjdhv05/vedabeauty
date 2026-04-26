@@ -80,6 +80,8 @@ const ShopByCategory = () => {
               </motion.div>
             ))
           )}
+          {/* Spacer for scroll-end on mobile */}
+          <div className="w-4 md:w-0 flex-shrink-0" />
         </div>
         
         {!loading && (
