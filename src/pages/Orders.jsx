@@ -7,17 +7,18 @@ import {
   Search,
   Clock,
   MapPin,
-  Package
+  Package,
+  FileText
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../services/orderService';
 
-const OrderCard = ({ order, onDetails }) => {
+const OrderCard = ({ order, onDetails, onInvoice }) => {
   const items = Array.isArray(order.items) ? order.items : [];
   const statusColor = {
     pending: 'text-[#D4AF37] bg-[#D4AF37]/10',
-    accepted: 'text-[#F8C8DC] bg-[#F8C8DC]/10',
+    accepted: 'text-[#DB2777] bg-pink-50',
     shipped: 'text-blue-500 bg-blue-50',
     delivered: 'text-green-500 bg-green-50',
     cancelled: 'text-red-500 bg-red-50',
@@ -29,11 +30,11 @@ const OrderCard = ({ order, onDetails }) => {
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 mb-4"
+      className="bg-white rounded-2xl p-5 shadow-sm border border-gray-50 mb-4 hover:border-pink-100 transition-colors"
     >
       <div className="flex justify-between items-start mb-4">
         <div>
-          <p className="text-[#F8C8DC] text-[10px] font-bold uppercase tracking-widest mb-1">#{order.id.slice(0, 8).toUpperCase()}</p>
+          <p className="text-[#DB2777] text-[10px] font-black uppercase tracking-widest mb-1">#{order.id.slice(0, 8).toUpperCase()}</p>
           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
             {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
           </p>
@@ -52,7 +53,7 @@ const OrderCard = ({ order, onDetails }) => {
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-start gap-2">
                 <h4 className="text-[11px] font-bold text-gray-900 leading-tight truncate">{item.name}</h4>
-                <span className="text-[11px] font-bold text-[#F8C8DC] flex-shrink-0">₹{item.price}</span>
+                <span className="text-[11px] font-black text-[#DB2777] flex-shrink-0">₹{item.price}</span>
               </div>
               <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Qty: {item.quantity}</p>
             </div>
@@ -67,16 +68,25 @@ const OrderCard = ({ order, onDetails }) => {
         </div>
         <div className="text-right">
           <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Total Pay</p>
-          <p className="text-sm font-bold text-gray-900">₹{order.total_amount}</p>
+          <p className="text-sm font-black text-[#DB2777]">₹{order.total_amount}</p>
         </div>
       </div>
 
-      <button 
-        onClick={() => onDetails(order.id)}
-        className="w-full py-3 bg-black text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-[#D4AF37] transition-all active:scale-95"
-      >
-        Track Order
-      </button>
+      <div className="grid grid-cols-2 gap-3">
+        <button 
+          onClick={() => onDetails(order.id)}
+          className="w-full py-3 bg-[#DB2777] text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-black transition-all active:scale-95 shadow-md shadow-pink-100"
+        >
+          Track Order
+        </button>
+        <button 
+          onClick={() => onInvoice(order.id)}
+          className="w-full py-3 bg-white text-gray-900 text-[10px] font-bold uppercase tracking-[0.2em] rounded-xl hover:bg-pink-50 border border-gray-100 transition-all active:scale-95 flex items-center justify-center gap-2"
+        >
+          <FileText size={14} className="text-[#DB2777]" />
+          Invoice
+        </button>
+      </div>
 
     </motion.div>
   );
@@ -104,15 +114,15 @@ const Orders = () => {
       {/* Header */}
       <div className="bg-white px-4 py-6 border-b border-gray-100 flex items-center gap-4 sticky top-0 z-50">
         <button onClick={() => navigate('/profile')} className="p-2 hover:bg-gray-50 rounded-xl transition-all">
-          <ArrowLeft size={20} className="text-gray-900" />
+          <ArrowLeft size={20} className="text-[#DB2777]" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900">My Orders</h1>
+        <h1 className="text-xl font-bold text-[#DB2777] uppercase tracking-wider">My Orders</h1>
       </div>
 
       <div className="px-4 mt-6 max-w-xl mx-auto">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64">
-            <div className="w-8 h-8 border-3 border-[#F8C8DC] border-t-transparent rounded-full animate-spin mb-4" />
+            <div className="w-8 h-8 border-3 border-[#DB2777] border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Loading orders...</p>
           </div>
         ) : orders.length > 0 ? (
@@ -122,21 +132,22 @@ const Orders = () => {
                 key={order.id} 
                 order={order} 
                 onDetails={(id) => navigate(`/orders/${id}`)}
+                onInvoice={(id) => navigate(`/order/${id}/invoice`)}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-50">
-             <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-200 mx-auto mb-4">
+          <div className="text-center py-20 bg-white rounded-2xl border border-pink-50 shadow-sm">
+             <div className="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-[#DB2777] mx-auto mb-4">
                 <ShoppingBag size={32} />
              </div>
-             <h3 className="text-lg font-bold text-gray-900">No Orders Yet</h3>
+             <h3 className="text-lg font-bold text-[#DB2777]">No Orders Yet</h3>
              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
                Start shopping to build your order history
              </p>
              <button 
-               onClick={() => navigate('/shop')}
-               className="mt-6 px-8 py-3 bg-[#F8C8DC] text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-black transition-all"
+               onClick={() => navigate('/')}
+               className="mt-6 px-8 py-3 bg-[#DB2777] text-white text-[10px] font-bold uppercase tracking-widest rounded-xl hover:bg-black transition-all"
              >
                Go to Shop
              </button>

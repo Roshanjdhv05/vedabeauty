@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Flame, Trophy, Tag,
+  ArrowLeft, Flame, Tag, Star,
   SlidersHorizontal, X, Search, Sparkles, ShoppingBag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,13 +23,6 @@ const CATEGORY_IMAGES = {
   Tools:       'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=400',
   Accessories: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=400',
 };
-
-const PRICE_TABS = [
-  { id: 99,  label: 'Under ₹99'  },
-  { id: 199, label: 'Under ₹199' },
-  { id: 299, label: 'Under ₹299' },
-  { id: 499, label: 'Under ₹499' },
-];
 
 const SORT_OPTIONS = [
   { val: 'default',    label: 'Default'    },
@@ -56,7 +49,7 @@ const SectionHeader = ({ icon: Icon, title, subtitle, accentClass = 'text-black'
 
 const BrandHero = ({ brandData, productCount, onBack }) => {
   const brandName = brandData?.name || 'Brand';
-  const bannerImg = brandData?.banner_url || 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=80&w=1200';
+  const bannerImg = brandData?.banner_url || '/brands_banner.png';
   
   return (
     <div className="relative w-full h-[220px] md:h-[350px] overflow-hidden">
@@ -150,10 +143,12 @@ const BrandPage = () => {
   const [sortBy,      setSortBy]      = useState('default');
   const [search,      setSearch]      = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [vfmTab,      setVfmTab]      = useState(299);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerRow, setItemsPerRow] = useState(2);
   const [categoryImages, setCategoryImages] = useState({});
+
+  // Review-based trending: { productId -> { avgRating, count } }
+  const [productRatings, setProductRatings] = useState({});
 
   useEffect(() => {
     const fetchCategoryImages = async () => {
@@ -207,6 +202,36 @@ const BrandPage = () => {
     return () => { cancelled = true; };
   }, [id]);
 
+  // Fetch aggregated ratings for all brand products from product_reviews
+  useEffect(() => {
+    if (!id) return;
+    const fetchRatings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('product_reviews')
+          .select('product_id, rating')
+          // Filter to only products belonging to this brand via a subquery join
+          .not('product_id', 'is', null);
+        if (error) throw error;
+        // Aggregate avg rating per product
+        const map = {};
+        (data || []).forEach(({ product_id, rating }) => {
+          if (!map[product_id]) map[product_id] = { sum: 0, count: 0 };
+          map[product_id].sum   += rating;
+          map[product_id].count += 1;
+        });
+        const avgMap = {};
+        Object.keys(map).forEach(pid => {
+          avgMap[pid] = { avgRating: map[pid].sum / map[pid].count, count: map[pid].count };
+        });
+        setProductRatings(avgMap);
+      } catch (err) {
+        console.error('Error fetching product ratings:', err);
+      }
+    };
+    fetchRatings();
+  }, [id]);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filterCat, sortBy, search]);
@@ -218,15 +243,29 @@ const BrandPage = () => {
   const explicitCats = Object.keys(categoryImages).sort();
   const uniqueCats = ['All', ...explicitCats];
 
-  const trending    = allProducts.slice(0, 50);
-  const bestSellers = [...allProducts]
-    .sort((a, b) => (b.reviews_count ?? 0) - (a.reviews_count ?? 0))
-    .slice(0, 50);
+  // ── TRENDING NOW ──────────────────────────────────────────────
+  // Products that belong to THIS brand that have ratings
+  const ratedBrandProducts = allProducts.filter(p => productRatings[p.id]?.count > 0);
+  const hasReviews = ratedBrandProducts.length > 0;
 
-  const vfmProducts = allProducts
-    .filter(p => (p.discount ?? 0) > 0 && p.price <= vfmTab)
-    .sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
-    .slice(0, 50);
+  const trendingProducts = hasReviews
+    ? // Sort by avg rating desc, then count desc
+      [...ratedBrandProducts]
+        .sort((a, b) => {
+          const ra = productRatings[a.id]?.avgRating ?? 0;
+          const rb = productRatings[b.id]?.avgRating ?? 0;
+          if (rb !== ra) return rb - ra;
+          return (productRatings[b.id]?.count ?? 0) - (productRatings[a.id]?.count ?? 0);
+        })
+        .slice(0, 20)
+    : // Fall back: pick 20 random products
+      [...allProducts].sort(() => Math.random() - 0.5).slice(0, 20);
+
+  // ── VALUE FOR MONEY ───────────────────────────────────────────
+  const valueForMoneyProducts = [...allProducts]
+    .sort((a, b) => (a.price || 0) - (b.price || 0))
+    .slice(0, 20);
+
 
   const filtered = allProducts
     .filter(p => filterCat === 'All' || p.category === filterCat)
@@ -288,38 +327,60 @@ const BrandPage = () => {
       )}
 
       {/* 3. TRENDING NOW */}
-      {trending.length > 0 && (
+      {trendingProducts.length > 0 && (
         <section className="mt-8">
-          <SectionHeader icon={Flame} title="Trending Now" subtitle="Hottest picks" accentClass="text-orange-500" />
+          <div className="flex items-center justify-between px-4 mb-1">
+            <div className="flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-500" />
+              <h2 className="text-xl font-bold text-black">Trending Now</h2>
+            </div>
+            {hasReviews && (
+              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full">
+                <Star className="w-3 h-3 fill-orange-400 stroke-orange-500" />
+                Top Rated
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-400 ml-11 px-4 mb-4">
+            {hasReviews ? 'Highest rated by customers' : 'Popular picks from this brand'}
+          </p>
           <div className="overflow-x-auto no-scrollbar scroll-smooth">
             <div className="flex gap-3 pb-4 w-max px-4">
-              {trending.map((product, index) => (
-                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0">
+              {trendingProducts.map((product, index) => (
+                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0 relative">
                   <ProductCard product={product} priority={index < 4} />
+                  {hasReviews && productRatings[product.id] && (
+                    <div className="absolute top-2 left-2 z-20 flex items-center gap-0.5 px-2 py-0.5 bg-orange-500 text-white text-[9px] font-bold rounded-full shadow-sm pointer-events-none">
+                      <Star className="w-2.5 h-2.5 fill-white stroke-white" />
+                      {productRatings[product.id].avgRating.toFixed(1)}
+                    </div>
+                  )}
                 </div>
               ))}
-              {/* Spacer for scroll-end */}
               <div className="w-12 flex-shrink-0" aria-hidden="true" />
             </div>
           </div>
         </section>
       )}
 
-      {/* 4. BEST SELLERS */}
-      {bestSellers.length > 0 && (
+      {/* 4. VALUE FOR MONEY */}
+      {valueForMoneyProducts.length > 0 && (
         <section className="mt-8">
-          <SectionHeader icon={Trophy} title="Best Sellers" subtitle="Most loved" accentClass="text-[#D4AF37]" />
+          <div className="flex items-center gap-2 px-4 mb-1">
+            <Tag className="w-5 h-5 text-green-600" />
+            <h2 className="text-xl font-bold text-black">Value For Money</h2>
+          </div>
+          <p className="text-sm text-gray-400 ml-11 px-4 mb-4">Best prices — lowest to highest</p>
           <div className="overflow-x-auto no-scrollbar scroll-smooth">
             <div className="flex gap-3 pb-4 w-max px-4">
-              {bestSellers.map((product, index) => (
+              {valueForMoneyProducts.map((product, index) => (
                 <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0 relative">
                   <ProductCard product={product} priority={index < 4} />
-                  <div className="absolute top-4 left-4 z-20 px-2 py-0.5 bg-[#D4AF37] text-black text-[9px] font-bold rounded-full shadow-sm pointer-events-none">
-                    Best Seller
+                  <div className="absolute top-2 left-2 z-20 px-2 py-0.5 bg-green-500 text-white text-[9px] font-bold rounded-full shadow-sm pointer-events-none">
+                    #{index + 1} Value
                   </div>
                 </div>
               ))}
-              {/* Spacer for scroll-end */}
               <div className="w-12 flex-shrink-0" aria-hidden="true" />
             </div>
           </div>
@@ -362,45 +423,7 @@ const BrandPage = () => {
         );
       })}
 
-      {/* 6. VALUE FOR MONEY SECTION */}
-      <section className="mt-10 py-8 bg-[#FDEEF4]/40 border-y border-[#F8C8DC]/20">
-        <SectionHeader icon={Tag} title="Value For Money" subtitle="Show ONLY discounted products" accentClass="text-green-600" />
-        
-        {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4 mb-6">
-          {PRICE_TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setVfmTab(tab.id)}
-              className={`flex-shrink-0 px-5 py-2 rounded-full text-xs font-bold transition-all ${
-                vfmTab === tab.id
-                  ? 'bg-[#F8C8DC] text-black shadow-md'
-                  : 'bg-white text-gray-500 border border-gray-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
 
-        {vfmProducts.length === 0 ? (
-          <div className="px-4 text-center py-10 text-gray-400 text-sm italic">
-            No discounted products found in this range.
-          </div>
-        ) : (
-          <div className="overflow-x-auto no-scrollbar scroll-smooth">
-            <div className="flex gap-3 pb-4 w-max px-4">
-              {vfmProducts.map((product, index) => (
-                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0">
-                  <ProductCard product={product} priority={index < 4} />
-                </div>
-              ))}
-              {/* Spacer for scroll-end */}
-              <div className="w-12 flex-shrink-0" aria-hidden="true" />
-            </div>
-          </div>
-        )}
-      </section>
 
       {/* 7. ALL PRODUCTS GRID */}
       <section id="all-products-grid" className="mt-10 scroll-mt-20">

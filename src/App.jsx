@@ -17,6 +17,9 @@ import CategoryResults from './pages/CategoryResults';
 import SearchResults from './pages/SearchResults';
 import BrandCategoryPage from './pages/BrandCategoryPage';
 import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import InvoicePage from './pages/InvoicePage';
+import BrandsPage from './pages/BrandsPage';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -51,6 +54,14 @@ const AppContent = () => {
     );
   }
 
+  if (location.pathname.startsWith('/order/') && location.pathname.endsWith('/invoice')) {
+    return (
+      <Routes>
+        <Route path="/order/:orderId/invoice" element={<InvoicePage />} />
+      </Routes>
+    );
+  }
+
   return (
     <MainLayout>
       <Routes>
@@ -70,7 +81,8 @@ const AppContent = () => {
         <Route path="/search" element={<SearchResults />} />
         <Route path="/brand/:brandId/category/:categoryName" element={<BrandCategoryPage />} />
         <Route path="/about" element={<AboutPage />} />
-
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/brands" element={<BrandsPage />} />
       </Routes>
     </MainLayout>
   );

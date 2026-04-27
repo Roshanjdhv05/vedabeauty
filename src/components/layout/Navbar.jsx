@@ -25,8 +25,9 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Categories', path: '/categories', icon: <LayoutGrid size={18} /> },
+    { name: 'Our Brands', path: '/brands', icon: <Package size={18} /> },
     { name: 'About Veda', path: '/about', icon: <Info size={18} /> },
-    { name: 'Contact Us', path: '/', icon: <PhoneCall size={18} /> },
+    { name: 'Contact Us', path: '/contact', icon: <PhoneCall size={18} /> },
   ];
 
   const handleSearch = (e) => {

@@ -68,11 +68,20 @@ const AdminProducts = () => {
     setLoading(true);
     try {
       // Fetch Products first to extract unique brands as a fallback
-      const { data: productsData } = await supabase.from('products').select('*');
+      // Also join with brands table to get the brand name if products use brand_id
+      const { data: productsData } = await supabase.from('products').select('*, brands(name)');
       let productBrands = [];
       if (productsData) {
-        setProducts(productsData);
-        productBrands = Array.from(new Set(productsData.map(p => p.brand || p.brand_name).filter(Boolean)));
+        // Normalize the brand name into the product object so filters work easily
+        const normalizedProducts = productsData.map(p => {
+          const resolvedBrandName = p.brands?.name || p.brand || p.brand_name;
+          return {
+            ...p,
+            brand_name: resolvedBrandName // Ensure we always have a brand_name
+          };
+        });
+        setProducts(normalizedProducts);
+        productBrands = Array.from(new Set(normalizedProducts.map(p => p.brand_name).filter(Boolean)));
       }
 
       // Fetch Brands from brands table

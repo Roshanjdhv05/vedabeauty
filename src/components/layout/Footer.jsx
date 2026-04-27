@@ -52,15 +52,15 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-6 text-[var(--primary)]">Get In Touch</h3>
             <div className="flex items-start gap-3 text-sm text-gray-400">
               <MapPin className="w-5 h-5 flex-shrink-0 text-gray-500" />
-              <span>123 Veda Beauty Plaza, Mumbai, Maharashtra 400001</span>
+              <span className="leading-relaxed">
+                Jasmine Plaza, Opp Radha Krishna,<br />
+                Jambhali Naka Station Road,<br />
+                Thane West - 400601
+              </span>
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-400">
               <Phone className="w-5 h-5 flex-shrink-0 text-gray-500" />
-              <span>+91 98765 43210</span>
-            </div>
-            <div className="flex items-center gap-3 text-sm text-gray-400">
-              <Mail className="w-5 h-5 flex-shrink-0 text-gray-500" />
-              <span>support@vedabeauty.com</span>
+              <span>+91 81692 92310</span>
             </div>
           </div>
 

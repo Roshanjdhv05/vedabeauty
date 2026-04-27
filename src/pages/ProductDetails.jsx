@@ -94,6 +94,7 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab]       = useState('description');
   const [activeSlide, setActiveSlide]   = useState(0);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [showReturnPolicy, setShowReturnPolicy] = useState(false);
   const swiperRef                       = useRef(null);
 
   /* ── fetch main product ── */
@@ -495,22 +496,65 @@ const ProductDetails = () => {
               </button>
             </div>
 
-            {/* Trust badges */}
-            <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-100">
-              {[
-                { icon: Shield,    label: '100% Authentic' },
-                { icon: Truck,     label: 'Free Delivery'  },
-                { icon: RefreshCw, label: 'Easy Returns'   },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex flex-col items-center text-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-gray-400" />
+            {/* Trust & Policy Info */}
+            <div className="mt-8 pt-8 border-t border-gray-100">
+              <div className="flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center">
+                    <Truck className="w-4 h-4 text-green-600" />
                   </div>
-                  <span className="text-[10px] md:text-xs font-medium text-gray-500 uppercase tracking-tight leading-tight">
-                    {label}
+                  <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-tight">
+                    Free delivery over ₹500
                   </span>
                 </div>
-              ))}
+                
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowReturnPolicy(!showReturnPolicy)}
+                    className="flex items-center gap-2 group transition-all"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100">
+                      <RefreshCw className="w-4 h-4 text-red-500" />
+                    </div>
+                    <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-tight border-b border-dashed border-gray-300 group-hover:border-red-300">
+                      Return Policy*
+                    </span>
+                  </button>
+
+                  <AnimatePresence>
+                    {showReturnPolicy && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        className="absolute bottom-full right-0 mb-4 w-64 p-4 bg-white border border-gray-100 shadow-2xl rounded-2xl z-50 pointer-events-auto"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center flex-shrink-0">
+                            <Shield className="w-4 h-4 text-orange-500" />
+                          </div>
+                          <div>
+                            <h4 className="text-[10px] font-bold text-gray-900 uppercase tracking-widest mb-1">Return Exceptions</h4>
+                            <p className="text-[10px] text-gray-500 leading-relaxed font-medium">
+                              Products with damage, products with expiry, or products different from the order are accepted, else not.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-[-6px] right-8 w-3 h-3 bg-white border-b border-r border-gray-100 rotate-45" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-tight">
+                    100% Authentic
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

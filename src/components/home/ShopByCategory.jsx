@@ -5,12 +5,12 @@ import OptimizedImage from '../ui/OptimizedImage';
 import { supabase } from '../../lib/supabase';
 
 const DEFAULT_CATEGORIES = [
-  { name: 'Lips', image_url: '/mars/cloud_kiss_lipstick.webp' },
-  { name: 'Eyes', image_url: '/mars/36_color_eyeshadow_palette.webp' },
-  { name: 'Face', image_url: '/mars/BB CREAM FOUNDATION.webp' },
-  { name: 'Nails', image_url: '/mars/COLOR BOMB NAIL PAINT (1).webp' },
-  { name: 'Removers & Wipes', image_url: '/mars/MAKEUP MELTING MICROFIBER WIPES.webp' },
-  { name: 'Tools & Accessories', image_url: '/mars/TOOLS OF TITAN BRUSH SET.webp' },
+  { name: 'Lips',                image_url: '/category images/lip.jpg' },
+  { name: 'Eyes',                image_url: '/category images/eyes.jpg' },
+  { name: 'Face',                image_url: '/category images/face.jpg' },
+  { name: 'Nails',               image_url: '/category images/nails.jpg' },
+  { name: 'Removers & Wipes',    image_url: '/category images/removersandwioes.jfif' },
+  { name: 'Tools & Accessories', image_url: '/category images/toolsandaccessories.jpg' },
 ];
 
 const ShopByCategory = () => {
@@ -71,7 +71,8 @@ const ShopByCategory = () => {
                   <div className="relative w-[80px] h-[80px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20 flex-shrink-0">
                     <OptimizedImage 
                       src={cat.image_url} 
-                      alt={cat.name} 
+                      alt={cat.name}
+                      objectFit="cover"
                     />
                   </div>
                   <span className="mt-2 text-[10px] md:text-sm font-bold text-black/60 uppercase tracking-widest text-center max-w-[80px] leading-tight flex-shrink-0">
