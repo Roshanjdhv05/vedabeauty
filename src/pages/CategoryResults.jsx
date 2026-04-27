@@ -36,10 +36,9 @@ const CategoryResults = () => {
 
   // Categorize products for sections
   const trendingProducts = allCategoryProducts.filter(p => (p.reviews_count || 0) > 20).slice(0, 50);
-  const valueForMoneyProducts = allCategoryProducts.filter(p => p.price < 499).slice(0, 50);
+  const valueForMoneyProducts = allCategoryProducts.filter(p => p.price < 499).slice(0, 12);
   const otherProducts = allCategoryProducts.filter(p => 
-    !trendingProducts.find(t => t.id === p.id) && 
-    !valueForMoneyProducts.find(v => v.id === p.id)
+    !trendingProducts.find(t => t.id === p.id)
   );
 
   return (
