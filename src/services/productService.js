@@ -1,10 +1,16 @@
 import { supabase } from '../lib/supabase';
 
-export const getProducts = async () => {
-  const { data, error } = await supabase
+export const getProducts = async (limit = null) => {
+  let query = supabase
     .from('products')
     .select('*, brands(name, logo_url)')
     .order('created_at', { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching products:', error);

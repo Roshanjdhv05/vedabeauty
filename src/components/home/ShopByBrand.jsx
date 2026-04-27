@@ -25,60 +25,62 @@ const ShopByBrand = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-serif font-bold text-black">Brands We Carry</h2>
         </div>
-        <div className="flex gap-10 md:gap-20 overflow-x-auto no-scrollbar items-center justify-start md:justify-center pb-6 px-4">
-          {loading ? (
-            // Skeleton Loader
-            [1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex-shrink-0 flex flex-col items-center gap-6">
-                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-white/20 animate-pulse" />
-                <div className="w-12 h-2 bg-white/20 animate-pulse rounded" />
-              </div>
-            ))
-          ) : (
-            brands.map((brand) => {
-              const isMars = brand.name.toUpperCase().includes('MARS');
-              const hasCustomLogo = brand.logo_url && brand.logo_url !== '/brands/default_logo.png';
-              
-              return (
-                <motion.div 
-                  key={brand.id} 
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate(`/brand/${brand.id}`)}
-                  className="flex-shrink-0 flex flex-col items-center gap-6 group cursor-pointer"
-                >
-                  <div className={`relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${
-                    hasCustomLogo 
-                      ? 'rounded-full border-[1.5px] border-[#E8B4C0] bg-white overflow-hidden p-2' 
-                      : isMars 
-                        ? 'bg-black rounded-2xl p-4' 
-                        : 'rounded-full border-[1.5px] border-[#E8B4C0] bg-[#FDEEF4] p-4'
-                  }`}>
-                    {hasCustomLogo ? (
-                      <OptimizedImage 
-                        src={brand.logo_url} 
-                        alt={brand.name} 
-                        containerClassName="rounded-full"
-                        className="object-contain"
-                      />
-                    ) : isMars ? (
-                      <div className="text-white font-bold text-center">
-                         <p className="text-xl tracking-tighter">MARS</p>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] md:text-[11px] font-sans font-bold text-[#8E9AAF] uppercase tracking-tighter text-center leading-tight">
-                        {brand.name}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] md:text-[10px] font-sans font-bold text-[#8E9AAF] uppercase tracking-widest text-center">
-                    {brand.name}
-                  </span>
-                </motion.div>
-              );
-            })
-          )}
-          {/* Spacer for scroll-end */}
-          <div className="flex-shrink-0 w-16 md:w-0" aria-hidden="true" />
+        <div className="overflow-x-auto no-scrollbar scroll-smooth">
+          <div className="flex gap-10 md:gap-20 items-center pb-6 w-max px-4">
+            {loading ? (
+              // Skeleton Loader
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex-shrink-0 flex flex-col items-center gap-6">
+                  <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-white/20 animate-pulse flex-shrink-0" />
+                  <div className="w-12 h-2 bg-white/20 animate-pulse rounded flex-shrink-0" />
+                </div>
+              ))
+            ) : (
+              brands.map((brand) => {
+                const isMars = brand.name.toUpperCase().includes('MARS');
+                const hasCustomLogo = brand.logo_url && brand.logo_url !== '/brands/default_logo.png';
+                
+                return (
+                  <motion.div 
+                    key={brand.id} 
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate(`/brand/${brand.id}`)}
+                    className="flex-shrink-0 flex flex-col items-center gap-6 group cursor-pointer"
+                  >
+                    <div className={`relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center transition-all duration-500 group-hover:scale-110 flex-shrink-0 ${
+                      hasCustomLogo 
+                        ? 'rounded-full border-[1.5px] border-[#E8B4C0] bg-white overflow-hidden p-2' 
+                        : isMars 
+                          ? 'bg-black rounded-2xl p-4' 
+                          : 'rounded-full border-[1.5px] border-[#E8B4C0] bg-[#FDEEF4] p-4'
+                    }`}>
+                      {hasCustomLogo ? (
+                        <OptimizedImage 
+                          src={brand.logo_url} 
+                          alt={brand.name} 
+                          containerClassName="rounded-full"
+                          className="object-contain"
+                        />
+                      ) : isMars ? (
+                        <div className="text-white font-bold text-center">
+                           <p className="text-xl tracking-tighter">MARS</p>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] md:text-[11px] font-sans font-bold text-[#8E9AAF] uppercase tracking-tighter text-center leading-tight">
+                          {brand.name}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] md:text-[10px] font-sans font-bold text-[#8E9AAF] uppercase tracking-widest text-center flex-shrink-0">
+                      {brand.name}
+                    </span>
+                  </motion.div>
+                );
+              })
+            )}
+            {/* Physical spacer for consistent end-padding */}
+            <div className="w-12 flex-shrink-0" aria-hidden="true" />
+          </div>
         </div>
       </div>
     </section>

@@ -3,22 +3,27 @@ import ProductCard from '../ui/ProductCard';
 
 const ProductSection = ({ products }) => {
   return (
-    <div className="w-full relative">
-      {/* 
-         Robust Horizontal Slider with Large End-Padding
-         - pl-4: Left padding to align with header
-         - pr-[50%]: MASSIVE right padding to ensure last card can be pulled fully into view
-         - snap-x snap-mandatory: Smooth mobile snapping experience
-      */}
-      <div className="flex overflow-x-auto gap-4 pl-4 pr-[50%] pb-6 scroll-smooth no-scrollbar snap-x snap-mandatory">
-        {products.map((product) => (
+    /* 
+       Matching the Category Page's slider pattern exactly:
+       - -mx-4 and px-4 for full-bleed edge-to-edge scrolling.
+       - gap-4 for consistent spacing.
+       - w-[160px] for consistent card sizing on mobile.
+    */
+    <div className="overflow-x-auto no-scrollbar scroll-smooth">
+      <div className="flex gap-4 pb-8 w-max px-4">
+        {products.map((product, index) => (
           <div 
             key={product.id} 
-            className="w-[150px] md:w-[280px] flex-shrink-0 snap-start"
+            className="flex-shrink-0 w-[160px] md:w-[280px]"
           >
-            <ProductCard product={product} />
+            <ProductCard 
+              product={product} 
+              priority={index < 4} 
+            />
           </div>
         ))}
+        {/* Physical spacer to ensure the last item is fully visible and has room */}
+        <div className="w-12 flex-shrink-0" aria-hidden="true" />
       </div>
     </div>
   );

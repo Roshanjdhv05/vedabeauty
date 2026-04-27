@@ -14,7 +14,9 @@ import OrderDetails from './pages/OrderDetails';
 import DealsPage from './pages/DealsPage';
 import CategoryPage from './pages/CategoryPage';
 import CategoryResults from './pages/CategoryResults';
-
+import SearchResults from './pages/SearchResults';
+import BrandCategoryPage from './pages/BrandCategoryPage';
+import AboutPage from './pages/AboutPage';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -65,6 +67,9 @@ const AppContent = () => {
         <Route path="/deals" element={<DealsPage />} />
         <Route path="/categories" element={<CategoryPage />} />
         <Route path="/category/:categoryName" element={<CategoryResults />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/brand/:brandId/category/:categoryName" element={<BrandCategoryPage />} />
+        <Route path="/about" element={<AboutPage />} />
 
       </Routes>
     </MainLayout>

@@ -3,47 +3,44 @@ import { Download } from 'lucide-react';
 
 const PWAInstallButton = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
     const handler = (e) => {
-      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      setShowButton(true);
+      console.log('PWA: beforeinstallprompt event captured');
     };
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-    };
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
-  const handleInstallClick = async () => {
+  const handleInstall = async () => {
     if (!deferredPrompt) return;
 
-    // Show the prompt
+    // Show the native install prompt
     deferredPrompt.prompt();
 
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
+    console.log(`PWA: User response to the install prompt: ${outcome}`);
 
-    // We've used the prompt, and can't use it again, throw it away
+    // Clear the prompt so it can only be used once
     setDeferredPrompt(null);
-    setShowButton(false);
   };
 
-  if (!showButton) return null;
+  // Only show the button if the install prompt is available
+  if (!deferredPrompt) return null;
 
   return (
     <button
-      onClick={handleInstallClick}
-      className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-accent/20 transition-all border border-accent/30 active:scale-95"
+      onClick={handleInstall}
+      className="flex items-center gap-2 px-6 py-2 bg-accent text-black text-[10px] md:text-xs font-bold uppercase tracking-widest rounded-full hover:bg-white transition-all shadow-[0_4px_15px_rgba(0,0,0,0.3)] group active:scale-95"
     >
-      <Download className="w-3 h-3" />
+      <Download size={14} className="group-hover:translate-y-0.5 transition-transform" />
       <span>Install App</span>
     </button>
   );

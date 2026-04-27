@@ -31,8 +31,8 @@ const CategoryResults = () => {
   const filteredProducts = allCategoryProducts;
 
   // Categorize products for sections
-  const trendingProducts = allCategoryProducts.filter(p => (p.reviews_count || 0) > 20).slice(0, 10);
-  const valueForMoneyProducts = allCategoryProducts.filter(p => p.price < 499).slice(0, 10);
+  const trendingProducts = allCategoryProducts.filter(p => (p.reviews_count || 0) > 20).slice(0, 50);
+  const valueForMoneyProducts = allCategoryProducts.filter(p => p.price < 499).slice(0, 50);
   const otherProducts = allCategoryProducts.filter(p => 
     !trendingProducts.find(t => t.id === p.id) && 
     !valueForMoneyProducts.find(v => v.id === p.id)
@@ -94,12 +94,16 @@ const CategoryResults = () => {
                     <div className="w-4 h-1 bg-gray-200 rounded-full" />
                   </div>
                 </div>
-                <div className="flex gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 scroll-smooth">
-                  {trendingProducts.map(product => (
-                    <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
-                      <ProductCard product={product} />
-                    </div>
-                  ))}
+                <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                  <div className="flex gap-4 md:gap-8 pb-8 w-max px-4">
+                    {trendingProducts.map((product, index) => (
+                      <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
+                        <ProductCard product={product} priority={index < 4} />
+                      </div>
+                    ))}
+                    {/* Spacer for scroll-end */}
+                    <div className="w-12 flex-shrink-0" aria-hidden="true" />
+                  </div>
                 </div>
               </section>
             )}
@@ -115,12 +119,16 @@ const CategoryResults = () => {
                     </div>
                     <span className="px-4 py-1.5 bg-accent/20 text-accent text-[10px] font-bold rounded-full border border-accent/30 uppercase tracking-widest">Under ₹499</span>
                   </div>
-                  <div className="flex gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 scroll-smooth">
-                    {valueForMoneyProducts.map(product => (
-                      <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
-                        <ProductCard product={product} />
-                      </div>
-                    ))}
+                  <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                    <div className="flex gap-4 md:gap-8 pb-8 w-max px-4">
+                      {valueForMoneyProducts.map((product, index) => (
+                        <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
+                          <ProductCard product={product} priority={index < 4} />
+                        </div>
+                      ))}
+                      {/* Spacer for scroll-end */}
+                      <div className="w-12 flex-shrink-0" aria-hidden="true" />
+                    </div>
                   </div>
                 </div>
               </section>

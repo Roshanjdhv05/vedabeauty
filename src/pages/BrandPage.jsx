@@ -218,15 +218,15 @@ const BrandPage = () => {
   const explicitCats = Object.keys(categoryImages).sort();
   const uniqueCats = ['All', ...explicitCats];
 
-  const trending    = allProducts.slice(0, 10);
+  const trending    = allProducts.slice(0, 50);
   const bestSellers = [...allProducts]
     .sort((a, b) => (b.reviews_count ?? 0) - (a.reviews_count ?? 0))
-    .slice(0, 8);
+    .slice(0, 50);
 
   const vfmProducts = allProducts
     .filter(p => (p.discount ?? 0) > 0 && p.price <= vfmTab)
     .sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0))
-    .slice(0, 10);
+    .slice(0, 50);
 
   const filtered = allProducts
     .filter(p => filterCat === 'All' || p.category === filterCat)
@@ -243,8 +243,12 @@ const BrandPage = () => {
   const pagedProducts = sortedAll.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleCategorySelect = (cat) => {
-    setFilterCat(cat);
-    document.getElementById('all-products-grid')?.scrollIntoView({ behavior: 'smooth' });
+    if (cat === 'All') {
+      setFilterCat('All');
+      document.getElementById('all-products-grid')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate(`/brand/${id}/category/${encodeURIComponent(cat)}`);
+    }
   };
 
   const scrollToTop = () => {
@@ -287,12 +291,16 @@ const BrandPage = () => {
       {trending.length > 0 && (
         <section className="mt-8">
           <SectionHeader icon={Flame} title="Trending Now" subtitle="Hottest picks" accentClass="text-orange-500" />
-          <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2">
-            {trending.map(product => (
-              <div key={product.id} className="w-[180px] md:w-[calc((100%-48px)/5)] flex-shrink-0">
-                <ProductCard product={product} />
-              </div>
-            ))}
+          <div className="overflow-x-auto no-scrollbar scroll-smooth">
+            <div className="flex gap-3 pb-4 w-max px-4">
+              {trending.map((product, index) => (
+                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0">
+                  <ProductCard product={product} priority={index < 4} />
+                </div>
+              ))}
+              {/* Spacer for scroll-end */}
+              <div className="w-12 flex-shrink-0" aria-hidden="true" />
+            </div>
           </div>
         </section>
       )}
@@ -301,18 +309,58 @@ const BrandPage = () => {
       {bestSellers.length > 0 && (
         <section className="mt-8">
           <SectionHeader icon={Trophy} title="Best Sellers" subtitle="Most loved" accentClass="text-[#D4AF37]" />
-          <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2">
-            {bestSellers.map((product, i) => (
-              <div key={product.id} className="w-[180px] md:w-[calc((100%-48px)/5)] flex-shrink-0 relative">
-                <ProductCard product={product} />
-                <div className="absolute top-4 left-4 z-20 px-2 py-0.5 bg-[#D4AF37] text-black text-[9px] font-bold rounded-full shadow-sm pointer-events-none">
-                  Best Seller
+          <div className="overflow-x-auto no-scrollbar scroll-smooth">
+            <div className="flex gap-3 pb-4 w-max px-4">
+              {bestSellers.map((product, index) => (
+                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0 relative">
+                  <ProductCard product={product} priority={index < 4} />
+                  <div className="absolute top-4 left-4 z-20 px-2 py-0.5 bg-[#D4AF37] text-black text-[9px] font-bold rounded-full shadow-sm pointer-events-none">
+                    Best Seller
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+              {/* Spacer for scroll-end */}
+              <div className="w-12 flex-shrink-0" aria-hidden="true" />
+            </div>
           </div>
         </section>
       )}
+
+      {/* 5. CATEGORY SPECIFIC SECTIONS */}
+      {explicitCats.map(cat => {
+        const catProducts = allProducts.filter(p => p.category === cat);
+        if (catProducts.length === 0) return null;
+        
+        return (
+          <section key={cat} className="mt-12">
+            <div className="flex items-end justify-between px-4 mb-4">
+              <SectionHeader 
+                icon={Sparkles} 
+                title={`${brandName} ${cat}`} 
+                subtitle={`Explore ${catProducts.length} items`}
+                accentClass="text-[#D4AF37]"
+              />
+              <button 
+                onClick={() => navigate(`/brand/${id}/category/${encodeURIComponent(cat)}`)}
+                className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] border-b border-[#D4AF37]/30 pb-1 mb-6 hover:border-[#D4AF37] transition-all"
+              >
+                See All
+              </button>
+            </div>
+            <div className="overflow-x-auto no-scrollbar scroll-smooth">
+              <div className="flex gap-3 pb-4 w-max px-4">
+                {catProducts.map((product, index) => (
+                  <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0">
+                    <ProductCard product={product} priority={index < 2} />
+                  </div>
+                ))}
+                {/* Spacer for scroll-end */}
+                <div className="w-12 flex-shrink-0" aria-hidden="true" />
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       {/* 6. VALUE FOR MONEY SECTION */}
       <section className="mt-10 py-8 bg-[#FDEEF4]/40 border-y border-[#F8C8DC]/20">
@@ -340,12 +388,16 @@ const BrandPage = () => {
             No discounted products found in this range.
           </div>
         ) : (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-2">
-            {vfmProducts.map(product => (
-              <div key={product.id} className="w-[180px] md:w-[calc((100%-48px)/5)] flex-shrink-0">
-                <ProductCard product={product} />
-              </div>
-            ))}
+          <div className="overflow-x-auto no-scrollbar scroll-smooth">
+            <div className="flex gap-3 pb-4 w-max px-4">
+              {vfmProducts.map((product, index) => (
+                <div key={product.id} className="w-[180px] md:w-[240px] flex-shrink-0">
+                  <ProductCard product={product} priority={index < 4} />
+                </div>
+              ))}
+              {/* Spacer for scroll-end */}
+              <div className="w-12 flex-shrink-0" aria-hidden="true" />
+            </div>
           </div>
         )}
       </section>

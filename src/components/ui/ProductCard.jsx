@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { getMarsImages } from '../../lib/marsImages';
 import OptimizedImage from './OptimizedImage';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, priority = false }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
@@ -53,6 +53,7 @@ const ProductCard = ({ product }) => {
           <OptimizedImage 
             src={thumbnail} 
             alt={product.name}
+            loading={priority ? 'eager' : 'lazy'}
             className="group-hover:scale-110 transition-transform duration-700"
           />
         </Link>

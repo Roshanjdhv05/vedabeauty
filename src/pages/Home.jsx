@@ -21,10 +21,18 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const data = await getProducts();
-      setAllProducts(data);
-      setFilteredProducts(data.filter(p => p.price < 499));
-      setLoading(false);
+      // 1. Fetch initial batch for sliders (fast)
+      const initialData = await getProducts(200);
+      setAllProducts(initialData);
+      setFilteredProducts(initialData.filter(p => p.price < 499));
+      setLoading(false); // Sliders show up now!
+
+      // 2. Fetch all products in background for the "All Products" grid
+      const fullData = await getProducts();
+      setAllProducts(fullData);
+      // Only update filteredProducts if the user hasn't started interacting with filters
+      // For now, we just update it as we did before
+      setFilteredProducts(fullData.filter(p => p.price < 499));
     };
     fetchData();
 
@@ -42,14 +50,22 @@ const Home = () => {
     setFilteredProducts(allProducts.filter(p => p.price <= maxPrice));
   };
 
-  const pageSize = itemsPerRow * 7; // Show 7 rows
-  const totalPages = Math.ceil(allProducts.length / pageSize);
-  const pagedProducts = allProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const pageSize = itemsPerRow * 10; // Increased rows for the main grid
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  const pagedProducts = filteredProducts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  // 5. Categorize products for Home sections
+  const trendingProducts = allProducts.slice(0, 12); // First 12 for now
+  const luxuryProducts = allProducts.filter(p => p.price > 999).slice(0, 20);
+  const valueProducts = allProducts
+    .filter(p => p.price < 599)
+    .sort((a, b) => a.price - b.price)
+    .slice(0, 20);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden flex flex-col gap-0 min-h-screen bg-background">
@@ -62,76 +78,82 @@ const Home = () => {
       {/* 3. SHOP BY BRAND */}
       <ShopByBrand />
 
-      {/* 5. PRODUCT SECTIONS */}
-      <div className="space-y-10 md:space-y-20 py-10 bg-background">
-        {/* Just Launched / Trending */}
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto px-4 flex justify-between items-end mb-6">
-             <div>
-               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Just Launched</h2>
-               <p className="text-sm text-gray-400 mt-1">Discover our latest professional additions</p>
-             </div>
-             <button 
-              onClick={() => navigate('/categories')}
-              className="text-[10px] font-bold uppercase tracking-widest text-accent border-b-2 border-accent pb-1"
-             >
-               View All
-             </button>
-          </div>
-          {loading ? (
-            <div className="flex gap-4 overflow-hidden px-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
-              ))}
+      {/* 5. FEATURED SECTIONS */}
+      <div className="space-y-16 py-10 bg-background">
+        {/* Trending Section */}
+        {trendingProducts.length > 0 && (
+          <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 flex justify-between items-end mb-6">
+               <div>
+                 <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Trending Products</h2>
+                 <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Professional Picks & Best Rated</p>
+               </div>
             </div>
-          ) : (
-            <ProductSection products={allProducts?.slice(0, 10) || []} />
-          )}
-        </div>
+            {loading ? (
+              <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex gap-4 pb-8 w-max px-4">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="w-[160px] md:w-[280px] aspect-[3/4] bg-white/10 animate-pulse rounded-2xl flex-shrink-0" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ProductSection products={trendingProducts} />
+            )}
+          </div>
+        )}
 
         {/* Luxury Selection */}
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto px-4 mb-6">
-             <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Luxury Selection</h2>
-             <p className="text-sm text-gray-400 mt-1">Premium products for professional results</p>
-          </div>
-          {loading ? (
-            <div className="flex gap-4 overflow-hidden px-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
-              ))}
+        {luxuryProducts.length > 0 && (
+          <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 mb-6">
+               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Luxury Selection</h2>
+               <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Premium Professional Range (₹999+)</p>
             </div>
-          ) : (
-            <ProductSection products={allProducts?.filter(p => p.price > 800).slice(0, 10) || []} />
-          )}
-        </div>
+            {loading ? (
+              <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex gap-4 pb-8 w-max px-4">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="w-[160px] md:w-[280px] aspect-[3/4] bg-white/10 animate-pulse rounded-2xl flex-shrink-0" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ProductSection products={luxuryProducts} />
+            )}
+          </div>
+        )}
 
-        <div className="max-w-7xl mx-auto px-4">
-          <ValueForMoney onFilterChange={handlePriceFilter} />
-        </div>
-        
-        <div className="w-full">
-          <div className="max-w-7xl mx-auto px-4 mb-6">
-             <h2 className="text-2xl md:text-4xl font-serif font-bold text-black">Great Deals</h2>
-             <p className="text-sm text-gray-400 mt-1">Professional quality, wholesale prices</p>
-          </div>
-          {loading ? (
-            <div className="flex gap-4 overflow-hidden px-4">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="w-[180px] md:w-[280px] aspect-[3/4] bg-white/20 animate-pulse rounded-2xl flex-shrink-0" />
-              ))}
+        {/* Great Value */}
+        {valueProducts.length > 0 && (
+          <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 mb-6">
+               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Great Value</h2>
+               <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Professional Quality under ₹599</p>
             </div>
-          ) : (
-            <ProductSection products={filteredProducts?.slice(0, 10) || []} />
-          )}
-        </div>
+            {loading ? (
+              <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex gap-4 pb-8 w-max px-4">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="w-[160px] md:w-[280px] aspect-[3/4] bg-white/10 animate-pulse rounded-2xl flex-shrink-0" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ProductSection products={valueProducts} />
+            )}
+          </div>
+        )}
       </div>
 
       {/* 7. ALL PRODUCTS SECTION */}
-      <section id="all-products" className="py-10 scroll-mt-20">
+      <section id="all-products" className="py-20 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4 mb-12 text-center">
-           <h2 className="text-4xl md:text-5xl font-serif font-bold text-black mb-4">All Professional Products</h2>
+           <h2 className="text-4xl md:text-5xl font-serif font-bold text-black mb-4 uppercase tracking-tighter">Professional Collection</h2>
            <div className="w-20 h-1 bg-accent mx-auto mb-6" />
+           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">
+             Total {allProducts?.length || 0} Products available
+           </p>
         </div>
 
         {loading ? (

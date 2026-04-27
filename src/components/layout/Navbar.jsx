@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useWishlist } from '../../context/WishlistContext';
-import PWAInstallButton from '../ui/PWAInstallButton';
+
 
 const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -29,30 +29,41 @@ const Navbar = () => {
     { name: 'Contact Us', path: '/', icon: <PhoneCall size={18} /> },
   ];
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+    }
+  };
+
   return (
-    <nav className="sticky top-0 z-50 w-full bg-black text-white py-1 md:py-2 shadow-2xl">
+    <nav className="sticky top-0 z-50 w-full bg-black text-white py-3 md:py-2 shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-1 md:gap-6">
         
         {/* Mobile Menu Icon */}
         <button 
-          className="md:hidden p-1 text-white/80"
+          className="md:hidden p-2 text-white/80"
           onClick={() => setIsMenuOpen(true)}
         >
-          <Menu size={20} />
+          <Menu size={24} />
         </button>
 
         {/* Logo */}
         <div className="flex-shrink-0 flex flex-col items-start text-left">
-          <Link to="/" className="text-lg md:text-2xl font-serif font-bold tracking-tighter leading-none text-white">
+          <Link to="/" className="text-xl md:text-2xl font-serif font-bold tracking-tighter leading-none text-white">
             VEDA BEAUTY
           </Link>
-          <span className="text-[7px] md:text-[10px] font-sans font-bold text-accent tracking-[0.1em] leading-none mt-0.5 uppercase">
+          <span className="text-[9px] md:text-[10px] font-sans font-bold text-accent tracking-[0.1em] leading-none mt-1 uppercase">
             Professional Wholesale
           </span>
         </div>
 
         {/* Desktop Search Bar (Hidden on Mobile) */}
-        <div className="hidden md:flex flex-1 max-w-xl relative group">
+        <form 
+          onSubmit={handleSearch}
+          className="hidden md:flex flex-1 max-w-xl relative group"
+        >
           <input
             type="text"
             placeholder="Search professional products..."
@@ -60,12 +71,13 @@ const Navbar = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-accent transition-colors" size={18} />
-        </div>
+          <button type="submit" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-accent transition-colors">
+            <Search size={18} />
+          </button>
+        </form>
 
         {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-8 mx-6">
-          <PWAInstallButton />
           {navLinks.map((link) => (
             <Link 
               key={link.name} 
@@ -162,7 +174,6 @@ const Navbar = () => {
                   <span className="text-[8px] font-sans font-bold text-accent tracking-[0.2em] uppercase">Professional</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <PWAInstallButton />
                   <button onClick={() => setIsMenuOpen(false)} className="p-2 bg-white/10 rounded-full text-white">
                     <X size={20} />
                   </button>
@@ -283,7 +294,7 @@ const Navbar = () => {
             exit={{ opacity: 0, y: -20 }}
             className="md:hidden px-4 pb-4 pt-2 bg-black border-t border-white/10"
           >
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
                 autoFocus
@@ -292,14 +303,17 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+              <button type="submit" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+                <Search size={18} />
+              </button>
               <button 
+                type="button"
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-1"
                 onClick={() => setIsSearchOpen(false)}
               >
                 <X className="w-4 h-4 text-white/40 hover:text-white" />
               </button>
-            </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
