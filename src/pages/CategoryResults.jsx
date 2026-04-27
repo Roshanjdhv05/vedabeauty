@@ -18,9 +18,13 @@ const CategoryResults = () => {
       setLoading(true);
       const data = await getProducts();
       // Case insensitive match
-      const filtered = data.filter(p => 
-        p.category?.toLowerCase() === categoryName?.toLowerCase()
-      );
+      const target = categoryName?.toLowerCase() || '';
+      const singularTarget = target.endsWith('s') ? target.slice(0, -1) : target;
+
+      const filtered = data.filter(p => {
+        const cat = p.category?.toLowerCase() || '';
+        return cat === target || cat.includes(singularTarget);
+      });
       setAllCategoryProducts(filtered);
       setLoading(false);
     };

@@ -182,18 +182,21 @@ export const getSimilarProducts = async (brandId, excludeId, limit = 8) => {
 };
 
 export const getRecommendedProducts = async (excludeId, limit = 8) => {
+  // Fetch a larger pool to allow for randomization
   const { data, error } = await supabase
     .from('products')
     .select('*, brands(*)')
     .neq('id', excludeId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
+    .limit(limit * 3);
 
   if (error) {
     console.error('Error fetching recommended products:', error);
     return [];
   }
-  return data;
+
+  // Shuffle the results to provide variety
+  const shuffled = [...data].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, limit);
 };
 
 // --- WISHLIST SERVICES ---

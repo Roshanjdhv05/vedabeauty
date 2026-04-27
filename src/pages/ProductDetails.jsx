@@ -29,7 +29,7 @@ const Skeleton = ({ className }) => (
 );
 
 /* ─── horizontal product row ─── */
-const ProductRow = ({ title, products, loading }) => {
+const ProductRow = React.memo(({ title, products, loading }) => {
   if (loading) {
     return (
       <section className="py-8 border-t border-gray-50">
@@ -66,7 +66,7 @@ const ProductRow = ({ title, products, loading }) => {
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-4 lg:grid-cols-5">
           {products.map((p) => (
-            <div key={p.id} className="w-[170px] md:w-auto flex-shrink-0">
+            <div key={`prod-${p.id}`} className="w-[170px] md:w-auto flex-shrink-0">
               <ProductCard product={p} />
             </div>
           ))}
@@ -74,7 +74,7 @@ const ProductRow = ({ title, products, loading }) => {
       </div>
     </section>
   );
-};
+});
 
 /* ─── main page ─── */
 const ProductDetails = () => {

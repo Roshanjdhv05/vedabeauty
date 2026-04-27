@@ -8,8 +8,8 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-const NEW_BANNER_DESKTOP = '/hero_banner.png';
-const NEW_BANNER_MOBILE = '/hero_mobile.png';
+const NEW_BANNER_DESKTOP = '/hero_banner.png?v=2';
+const NEW_BANNER_MOBILE = '/hero_mobile.png?v=2';
 const OLD_BANNER = 'https://images.unsplash.com/photo-1522338242992-e1a54906a8da?auto=format&fit=crop&q=75&w=1200';
 
 const HeroSection = () => {

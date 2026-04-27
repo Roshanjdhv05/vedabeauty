@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
+import ScrollToTop from './components/layout/ScrollToTop';
 import Home from './pages/Home';
 import BrandPage from './pages/BrandPage';
 import ProductDetails from './pages/ProductDetails';
@@ -64,6 +65,7 @@ const AppContent = () => {
 
   return (
     <MainLayout>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/brand/:id" element={<BrandPage />} />

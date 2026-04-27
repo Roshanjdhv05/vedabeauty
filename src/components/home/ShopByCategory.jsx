@@ -5,12 +5,12 @@ import OptimizedImage from '../ui/OptimizedImage';
 import { supabase } from '../../lib/supabase';
 
 const DEFAULT_CATEGORIES = [
-  { name: 'Lips',                image_url: '/category images/lip.jpg' },
-  { name: 'Eyes',                image_url: '/category images/eyes.jpg' },
-  { name: 'Face',                image_url: '/category images/face.jpg' },
-  { name: 'Nails',               image_url: '/category images/nails.jpg' },
-  { name: 'Removers & Wipes',    image_url: '/category images/removersandwioes.jfif' },
-  { name: 'Tools & Accessories', image_url: '/category images/toolsandaccessories.jpg' },
+  { name: 'Lips',                image_url: '/category images/lip.jpg?v=2' },
+  { name: 'Eyes',                image_url: '/category images/eyes.jpg?v=2' },
+  { name: 'Face',                image_url: '/category images/face.jpg?v=2' },
+  { name: 'Nails',               image_url: '/category images/nails.jpg?v=2' },
+  { name: 'Removers & Wipes',    image_url: '/category images/removersandwioes.jfif?v=2' },
+  { name: 'Tools & Accessories', image_url: '/category images/toolsandaccessories.jpg?v=2' },
 ];
 
 const ShopByCategory = () => {

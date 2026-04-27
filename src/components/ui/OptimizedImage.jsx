@@ -28,10 +28,12 @@ const OptimizedImage = ({
 
   // Update currentSrc if src prop changes
   useEffect(() => {
-    setCurrentSrc(src);
-    setIsLoaded(false);
-    setError(false);
-  }, [src]);
+    if (src !== currentSrc) {
+      setCurrentSrc(src);
+      setIsLoaded(false);
+      setError(false);
+    }
+  }, [src, currentSrc]);
 
   const handleLoad = () => {
     setIsLoaded(true);

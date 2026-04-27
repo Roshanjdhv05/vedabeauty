@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { getMarsImages } from '../../lib/marsImages';
 import OptimizedImage from './OptimizedImage';
 
-const ProductCard = ({ product, priority = false }) => {
+const ProductCard = React.memo(({ product, priority = false }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
@@ -119,6 +119,6 @@ const ProductCard = ({ product, priority = false }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 export default ProductCard;

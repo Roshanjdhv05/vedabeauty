@@ -5,7 +5,7 @@ import { getBrands } from '../services/productService';
 import OptimizedImage from '../components/ui/OptimizedImage';
 import { ArrowLeft, Sparkles, ShoppingBag } from 'lucide-react';
 
-const BRANDS_BANNER = '/brands_banner.png';
+const BRANDS_BANNER = '/brands_banner.png?v=2';
 
 const BrandsPage = () => {
   const navigate = useNavigate();
