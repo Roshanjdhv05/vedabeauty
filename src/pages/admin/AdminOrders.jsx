@@ -255,9 +255,26 @@ const AdminOrders = () => {
     const matchesSearch = (order.customer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (order.id || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (order.city || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === 'All' || order.status?.toLowerCase() === activeTab.toLowerCase();
+    const orderStatus = (order.status || 'pending').toLowerCase();
+    const matchesTab = activeTab === 'All' || orderStatus === activeTab.toLowerCase();
     return matchesSearch && matchesTab;
   });
+
+  const getTabInfo = (tab) => {
+    const count = tab === 'All' 
+      ? orders.length 
+      : orders.filter(o => (o.status || 'pending').toLowerCase() === tab.toLowerCase()).length;
+
+    let colorClass = 'bg-gray-100 text-gray-500';
+    if (tab === 'Pending') colorClass = 'bg-orange-50 text-orange-600';
+    if (tab === 'Accepted') colorClass = 'bg-[#D4AF37]/10 text-[#D4AF37]';
+    if (tab === 'Shipped') colorClass = 'bg-blue-50 text-blue-600';
+    if (tab === 'Delivered') colorClass = 'bg-green-50 text-green-600';
+    if (tab === 'Cancelled') colorClass = 'bg-red-50 text-red-600';
+    if (tab === 'All') colorClass = 'bg-gray-100 text-gray-600';
+
+    return { count, colorClass };
+  };
 
   return (
     <div className="space-y-8">
@@ -274,16 +291,22 @@ const AdminOrders = () => {
             />
          </div>
          <div className="flex bg-white p-1.5 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
-            {['All', 'Pending', 'Accepted', 'Shipped', 'Delivered', 'Cancelled'].map(tab => (
-              <button 
-                key={tab} 
-                onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
-                activeTab === tab ? 'bg-black text-white shadow-lg' : 'text-gray-400 hover:text-black'
-              }`}>
-                {tab}
-              </button>
-            ))}
+            {['All', 'Pending', 'Accepted', 'Shipped', 'Delivered', 'Cancelled'].map(tab => {
+              const { count, colorClass } = getTabInfo(tab);
+              return (
+                <button 
+                  key={tab} 
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
+                  activeTab === tab ? 'bg-black text-white shadow-lg' : 'text-gray-400 hover:text-black'
+                }`}>
+                  {tab}
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === tab ? 'bg-white/20 text-white' : colorClass}`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
          </div>
 
       </div>
