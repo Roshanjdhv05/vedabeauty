@@ -271,14 +271,6 @@ const ProductDetails = () => {
                 onSlideChange={(swiper) => setActiveSlide(swiper.activeIndex)}
                 className="aspect-square w-full md:rounded-3xl overflow-hidden shadow-md"
               >
-                {selectedVariant?.image_url ? (
-                  <SwiperSlide>
-                    <OptimizedImage
-                      src={selectedVariant.image_url}
-                      alt={selectedVariant.name}
-                    />
-                  </SwiperSlide>
-                ) : null}
                 {productImages.map((img, i) => (
                   <SwiperSlide key={i}>
                     <OptimizedImage
@@ -402,15 +394,32 @@ const ProductDetails = () => {
                         <button
                           key={v.id}
                           onClick={() => setSelectedVariant(v)}
-                          className={`group relative flex-shrink-0 w-12 h-12 rounded-full p-1 transition-all duration-300 ${
-                            isSelected ? 'ring-2 ring-pink-400 ring-offset-2' : 'hover:scale-110'
+                          className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
+                            isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
                           }`}
                         >
-                          <div 
-                            className="w-full h-full rounded-full border border-gray-100 shadow-inner"
-                            style={{ backgroundColor: v.color_code || '#ccc' }}
-                          />
-                          <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-400 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
+                          <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
+                            {v.image_url ? (
+                              <img 
+                                src={v.image_url} 
+                                alt={v.name} 
+                                className="w-full h-full object-cover block"
+                                loading="eager"
+                                onError={(e) => {
+                                  console.log("Image load error for:", v.name);
+                                  e.target.style.display = 'none';
+                                  if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div 
+                              className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
+                              style={{ backgroundColor: v.color_code || '#f3f4f6' }}
+                            >
+                              {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}
+                            </div>
+                          </div>
+                          <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
                         </button>
                       );
                     }

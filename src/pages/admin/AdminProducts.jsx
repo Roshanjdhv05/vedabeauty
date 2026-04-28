@@ -164,8 +164,10 @@ const AdminProducts = () => {
 
       // Save Variants if enabled
       if (productForm.has_variants) {
+        console.log("📤 SAVING VARIANTS TO DATABASE:", productVariants);
         const { saveProductVariants } = await import('../../services/productService');
-        await saveProductVariants(productId, productVariants);
+        const { error: variantError } = await saveProductVariants(productId, productVariants);
+        if (variantError) throw variantError;
       }
 
       alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
@@ -218,6 +220,8 @@ const AdminProducts = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `variant_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
       
+      console.log("Attempting upload to Supabase Storage:", fileName);
+
       const { error: uploadError } = await supabase.storage
         .from('product-images')
         .upload(fileName, file);
@@ -226,9 +230,16 @@ const AdminProducts = () => {
 
       const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
       
-      setNewVariant({ ...newVariant, image_url: data.publicUrl });
+      if (data?.publicUrl) {
+        setNewVariant(prev => ({ ...prev, image_url: data.publicUrl }));
+        console.log("Variant image successfully uploaded. Public URL:", data.publicUrl);
+        window.alert(`✅ Uploaded successfully!\nURL: ${data.publicUrl}`);
+      } else {
+        throw new Error("Could not generate public URL");
+      }
     } catch (error) {
-      alert(`Error uploading variant image: ${error.message}`);
+      console.error("Variant upload error details:", error);
+      alert(`❌ Error uploading image: ${error.message}`);
     } finally {
       setIsUploadingVariantImage(false);
     }
@@ -653,15 +664,7 @@ const AdminProducts = () => {
                               <option value="volume">Volume</option>
                             </select>
                           </div>
-                          <div className="col-span-1">
-                            <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Stock</label>
-                            <input 
-                              type="number"
-                              value={newVariant.stock}
-                              onChange={(e) => setNewVariant({...newVariant, stock: parseInt(e.target.value) || 0})}
-                              className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
-                            />
-                          </div>
+
                           {newVariant.type === 'shade' && (
                             <div className="col-span-1">
                               <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Color Code (Hex)</label>
@@ -709,6 +712,7 @@ const AdminProducts = () => {
                               />
                             </div>
                             {isUploadingVariantImage && <p className="text-[8px] text-accent font-bold mt-1 animate-pulse">Uploading...</p>}
+                            {!isUploadingVariantImage && newVariant.image_url && <p className="text-[8px] text-green-500 font-bold mt-1 flex items-center gap-1"><CheckCircle2 size={10} /> Image Uploaded!</p>}
                           </div>
                           <div className="col-span-1 flex items-end">
                             <button 
@@ -716,7 +720,7 @@ const AdminProducts = () => {
                               onClick={() => {
                                 if (!newVariant.name) return alert('Variant name is required');
                                 setProductVariants([...productVariants, { ...newVariant }]);
-                                setNewVariant({ name: '', type: 'shade', color_code: '', image_url: '', price: '', stock: 0 });
+                                setNewVariant({ name: '', type: 'shade', color_code: '', image_url: '', price: '' });
                               }}
                               className="w-full bg-black text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
                             >
@@ -742,7 +746,7 @@ const AdminProducts = () => {
                                   <div className="flex flex-col">
                                     <span className="text-xs font-bold text-gray-900">{v.name}</span>
                                     <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                                      {v.type} {v.stock !== undefined ? `• Stock: ${v.stock}` : ''} {v.price ? `• ₹${v.price}` : ''}
+                                      {v.type} {v.price ? `• ₹${v.price}` : ''}
                                     </span>
                                   </div>
                                 </div>
