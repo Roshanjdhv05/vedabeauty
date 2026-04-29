@@ -440,11 +440,7 @@ const ProductDetails = () => {
                   })}
                 </div>
                 
-                {selectedVariant && selectedVariant.stock <= 0 && (
-                  <p className="mt-3 text-[10px] text-red-500 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <Package className="w-3 h-3" /> Out of stock in this {variantType}
-                  </p>
-                )}
+
               </div>
             )}
 
