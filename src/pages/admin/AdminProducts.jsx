@@ -26,6 +26,8 @@ const AdminProducts = () => {
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedProductIds, setSelectedProductIds] = useState([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // New Brand State
   const [newBrand, setNewBrand] = useState({
@@ -334,6 +336,77 @@ const AdminProducts = () => {
     }
   };
 
+  const handleDeleteProduct = async (product) => {
+    if (!window.confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) return;
+
+    try {
+      // First delete associated variants if any
+      // Note: If your Supabase schema has ON DELETE CASCADE on the foreign key, 
+      // this manual step might not be strictly necessary but it's safer.
+      if (product.has_variants) {
+        const { error: variantError } = await supabase
+          .from('product_variants')
+          .delete()
+          .eq('product_id', product.id);
+        if (variantError) {
+          console.error('Error deleting variants:', variantError);
+          // We continue anyway, as the main product deletion might still succeed or fail based on FK constraints
+        }
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', product.id);
+      
+      if (error) throw error;
+      
+      alert('Product deleted successfully!');
+      fetchInitialData();
+    } catch (error) {
+      if (error.code === '42501') {
+        alert('Database Security Error: You do not have permission to delete products.');
+      } else {
+        alert(`Error deleting product: ${error.message}`);
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete ${selectedProductIds.length} products? This action cannot be undone.`)) return;
+
+    setIsBulkDeleting(true);
+    try {
+      // 1. Delete variants for all selected products
+      const { error: variantError } = await supabase
+        .from('product_variants')
+        .delete()
+        .in('product_id', selectedProductIds);
+      
+      if (variantError) console.error('Error deleting variants in bulk:', variantError);
+
+      // 2. Delete products
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .in('id', selectedProductIds);
+
+      if (error) throw error;
+
+      alert(`${selectedProductIds.length} products deleted successfully!`);
+      setSelectedProductIds([]);
+      fetchInitialData();
+    } catch (error) {
+      if (error.code === '42501') {
+        alert('Database Security Error: You do not have permission to delete products.');
+      } else {
+        alert(`Error deleting products: ${error.message}`);
+      }
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   return (
     <div className="flex gap-10">
       {/* Brands Sidebar */}
@@ -429,12 +502,28 @@ const AdminProducts = () => {
                 className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-6 text-sm focus:outline-none focus:border-accent/50 shadow-sm"
               />
            </div>
-           <button 
-             onClick={handleAddNew}
-             className="bg-black text-white px-8 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-xl"
-           >
-             <Plus size={18} className="text-accent" /> Add New Product
-           </button>
+           <div className="flex items-center gap-4">
+             {selectedProductIds.length > 0 && (
+               <button 
+                 onClick={handleBulkDelete}
+                 disabled={isBulkDeleting}
+                 className="bg-red-500 text-white px-6 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-red-600 transition-all shadow-xl disabled:opacity-50"
+               >
+                 {isBulkDeleting ? (
+                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                 ) : (
+                   <Trash2 size={18} />
+                 )}
+                 Delete Selected ({selectedProductIds.length})
+               </button>
+             )}
+             <button 
+               onClick={handleAddNew}
+               className="bg-black text-white px-8 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-xl"
+             >
+               <Plus size={18} className="text-accent" /> Add New Product
+             </button>
+           </div>
         </div>
 
         {/* Product List */}
@@ -448,6 +537,20 @@ const AdminProducts = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-50">
+                  <th className="px-8 py-6 w-10">
+                    <input 
+                      type="checkbox" 
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedProductIds(filteredProducts.map(p => p.id));
+                        } else {
+                          setSelectedProductIds([]);
+                        }
+                      }}
+                      checked={selectedProductIds.length === filteredProducts.length && filteredProducts.length > 0}
+                      className="rounded border-gray-300 text-accent focus:ring-accent cursor-pointer"
+                    />
+                  </th>
                   <th className="px-8 py-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Product Info</th>
                   <th className="px-8 py-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</th>
                   <th className="px-8 py-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Price (INR)</th>
@@ -456,7 +559,21 @@ const AdminProducts = () => {
               </thead>
               <tbody>
                 {filteredProducts.map((p) => (
-                  <tr key={p.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                  <tr key={p.id} className={`border-b border-gray-50 hover:bg-gray-50/50 transition-colors ${selectedProductIds.includes(p.id) ? 'bg-gray-50' : ''}`}>
+                    <td className="px-8 py-6 w-10">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedProductIds.includes(p.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProductIds([...selectedProductIds, p.id]);
+                          } else {
+                            setSelectedProductIds(selectedProductIds.filter(id => id !== p.id));
+                          }
+                        }}
+                        className="rounded border-gray-300 text-accent focus:ring-accent cursor-pointer"
+                      />
+                    </td>
                     <td className="px-8 py-6">
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
@@ -492,7 +609,10 @@ const AdminProducts = () => {
                         >
                           <Edit2 size={16} />
                         </button>
-                        <button className="p-3 text-red-300 hover:text-red-500 hover:bg-white rounded-xl shadow-sm transition-all">
+                        <button 
+                          onClick={() => handleDeleteProduct(p)}
+                          className="p-3 text-red-300 hover:text-red-500 hover:bg-white rounded-xl shadow-sm transition-all"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
