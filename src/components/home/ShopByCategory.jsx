@@ -41,9 +41,9 @@ const ShopByCategory = () => {
   }, []);
 
   return (
-    <section className="pt-4 pb-2 bg-background">
+    <section className="pt-0 pb-2 bg-background">
       <div className="max-w-7xl mx-auto px-4 overflow-hidden">
-        <h2 className="text-3xl md:text-5xl font-serif font-medium text-center mb-10 text-[#333]">
+        <h2 className="text-3xl md:text-5xl font-serif font-medium text-center mb-6 text-[#333]">
           Shop by Category
         </h2>
         
@@ -68,7 +68,7 @@ const ShopByCategory = () => {
                   className="flex-shrink-0 flex flex-col items-center group cursor-pointer"
                   onClick={() => navigate(`/category/${cat.name}`)}
                 >
-                  <div className="relative w-[80px] h-[80px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105 border border-white/20 flex-shrink-0">
+                  <div className="relative w-[80px] h-[80px] md:w-44 md:h-44 rounded-2xl md:rounded-[2.5rem] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.1)] transition-transform duration-500 group-hover:scale-105 border border-white/20 flex-shrink-0">
                     <OptimizedImage 
                       src={cat.image_url} 
                       alt={cat.name}
@@ -87,7 +87,7 @@ const ShopByCategory = () => {
         </div>
         
         {!loading && (
-          <div className="text-center mt-[-1rem]">
+          <div className="text-center mt-[-0.5rem]">
             <button 
               onClick={() => navigate('/categories')}
               className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#333] border-b border-black/20 pb-1 hover:border-black transition-all"

@@ -4,9 +4,9 @@ import { DollarSign } from 'lucide-react';
 
 const filters = [
   { label: 'Under ₹99', color: 'bg-[#FFF9C4]', borderColor: 'border-[#FFF176]', textColor: 'text-[#827717]' },
-  { label: 'Under ₹199', color: 'bg-[#FCE4EC]', borderColor: 'border-[#F8BBD0]', textColor: 'text-[#880E4F]' },
-  { label: 'Under ₹299', color: 'bg-[#E8F5E9]', borderColor: 'border-[#C8E6C9]', textColor: 'text-[#1B5E20]' },
-  { label: 'Under ₹499', color: 'bg-[#E3F2FD]', borderColor: 'border-[#BBDEFB]', textColor: 'text-[#0D47A1]' },
+  { label: 'Under ₹299', color: 'bg-[#FCE4EC]', borderColor: 'border-[#F8BBD0]', textColor: 'text-[#880E4F]' },
+  { label: 'Under ₹399', color: 'bg-[#E8F5E9]', borderColor: 'border-[#C8E6C9]', textColor: 'text-[#1B5E20]' },
+  { label: 'Under ₹599', color: 'bg-[#E3F2FD]', borderColor: 'border-[#BBDEFB]', textColor: 'text-[#0D47A1]' },
 ];
 
 const PriceFilters = () => {

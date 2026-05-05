@@ -7,9 +7,9 @@ import ProductCard from '../components/ui/ProductCard';
 
 const PRICE_DEALS = [
   { id: 99,  label: 'Under ₹99',  color: 'bg-[#FFF9C4]', border: 'border-[#FFF176]', text: 'text-[#827717]' },
-  { id: 199, label: 'Under ₹199', color: 'bg-[#FCE4EC]', border: 'border-[#F8BBD0]', text: 'text-[#880E4F]' },
-  { id: 299, label: 'Under ₹299', color: 'bg-[#E8F5E9]', border: 'border-[#C8E6C9]', text: 'text-[#1B5E20]' },
-  { id: 499, label: 'Under ₹499', color: 'bg-[#E3F2FD]', border: 'border-[#BBDEFB]', text: 'text-[#0D47A1]' },
+  { id: 299, label: 'Under ₹299', color: 'bg-[#FCE4EC]', border: 'border-[#F8BBD0]', text: 'text-[#880E4F]' },
+  { id: 399, label: 'Under ₹399', color: 'bg-[#E8F5E9]', border: 'border-[#C8E6C9]', text: 'text-[#1B5E20]' },
+  { id: 599, label: 'Under ₹599', color: 'bg-[#E3F2FD]', border: 'border-[#BBDEFB]', text: 'text-[#0D47A1]' },
 ];
 
 const PAGE_SIZE = 20;

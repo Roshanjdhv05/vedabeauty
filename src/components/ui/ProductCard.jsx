@@ -45,7 +45,7 @@ const ProductCard = React.memo(({ product, priority = false }) => {
   return (
     <motion.div 
       whileTap={{ scale: 0.98 }}
-      className="bg-white rounded-2xl shadow-sm p-3 flex flex-col h-full group cursor-pointer border border-black/5 hover:shadow-xl transition-all duration-300"
+      className="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.08)] p-3 flex flex-col h-full group cursor-pointer border border-black/5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
     >
       {/* Image Container */}
       <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-3">

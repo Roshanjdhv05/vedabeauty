@@ -4,9 +4,11 @@ import { getProducts } from '../services/productService';
 import ProductCard from '../components/ui/ProductCard';
 import { ChevronLeft, SlidersHorizontal, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getMappedCategories } from '../utils/categoryMapping';
+import { supabase } from '../lib/supabase';
 
 const CategoryResults = () => {
-  const { categoryName } = useParams();
+  const { categoryName, id } = useParams();
   const navigate = useNavigate();
   const [allCategoryProducts, setAllCategoryProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,20 +19,39 @@ const CategoryResults = () => {
     const fetchProducts = async () => {
       setLoading(true);
       const data = await getProducts();
+      
+      let brandName = '';
+      if (id) {
+        const { data: brand } = await supabase.from('brands').select('name').eq('id', id).single();
+        if (brand) brandName = brand.name;
+      }
+
       // Case insensitive match
       const target = categoryName?.toLowerCase() || '';
       const singularTarget = target.endsWith('s') ? target.slice(0, -1) : target;
+      
+      const targetCats = getMappedCategories(brandName, target);
 
       const filtered = data.filter(p => {
         const cat = p.category?.toLowerCase() || '';
-        return cat === target || cat.includes(singularTarget);
+        const name = p.name?.toLowerCase() || '';
+        
+        // Match if product's category is in our mapped subcategories
+        if (targetCats.includes(cat)) return true;
+        
+        // Fallback checks for singular or name match
+        return cat === target || cat.includes(singularTarget) || name.includes(singularTarget);
       });
-      setAllCategoryProducts(filtered);
+      
+      // If we are on a brand page, also filter by brand id
+      const brandFiltered = id ? filtered.filter(p => p.brand_id === id) : filtered;
+      
+      setAllCategoryProducts(brandFiltered);
       setLoading(false);
     };
     fetchProducts();
     window.scrollTo(0, 0);
-  }, [categoryName]);
+  }, [categoryName, id]);
 
   const filteredProducts = allCategoryProducts;
 

@@ -4,7 +4,6 @@ import ShopByBrand from '../components/home/ShopByBrand';
 import ShopByCategory from '../components/home/ShopByCategory';
 import ProductSection from '../components/home/ProductSection';
 import ValueForMoney from '../components/home/ValueForMoney';
-import WholesaleCTA from '../components/home/WholesaleCTA';
 import ProductCard from '../components/ui/ProductCard';
 import { getProducts } from '../services/productService';
 import { useNavigate } from 'react-router-dom';
@@ -77,6 +76,9 @@ const Home = () => {
 
       {/* 3. SHOP BY BRAND */}
       <ShopByBrand />
+
+      {/* 4. VALUE FOR MONEY SECTION */}
+      <ValueForMoney />
 
       {/* 5. FEATURED SECTIONS */}
       <div className="space-y-16 py-10 bg-background">
@@ -231,8 +233,7 @@ const Home = () => {
         )}
       </section>
 
-      <WholesaleCTA />
-      
+
       <div className="bg-[#0a0a0a] py-8 text-center border-t border-white/5">
         <p className="text-[10px] text-white/20 font-sans uppercase tracking-[0.4em]">
           &copy; {new Date().getFullYear()} VEDA BEAUTY. All rights reserved.

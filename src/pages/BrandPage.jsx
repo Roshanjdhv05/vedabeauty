@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getProductsByBrand } from '../services/productService';
 import ProductCard from '../components/ui/ProductCard';
 import { supabase } from '../lib/supabase';
+import { getMappedCategories } from '../utils/categoryMapping';
 
 /* ─────────────────────────────────────────────────
    CONSTANTS & DESIGN SYSTEM
@@ -116,11 +117,11 @@ const CategoryScroller = ({ categories, onSelect, categoryImages }) => (
           onClick={() => onSelect(cat)}
           className="flex-shrink-0 flex flex-col items-center gap-3 w-[80px] md:w-[100px]"
         >
-          <div className="aspect-square w-full rounded-2xl bg-white flex items-center justify-center overflow-hidden border border-[#F8C8DC]/30 shadow-sm p-4 transition-all hover:border-[#F8C8DC] hover:shadow-md">
+          <div className="aspect-square w-full rounded-2xl bg-white flex items-center justify-center overflow-hidden border border-[#F8C8DC]/30 shadow-sm transition-all hover:border-[#F8C8DC] hover:shadow-md">
             <img 
               src={categoryImages[cat] ?? DEFAULT_CATEGORY_IMAGES[cat] ?? DEFAULT_CATEGORY_IMAGES.Face} 
               alt={cat}
-              className="w-full h-full object-cover rounded-xl transition-transform duration-500 hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             />
           </div>
           <span className="text-[11px] md:text-sm font-semibold text-gray-700 text-center leading-tight">
@@ -268,7 +269,11 @@ const BrandPage = () => {
 
 
   const filtered = allProducts
-    .filter(p => filterCat === 'All' || p.category === filterCat)
+    .filter(p => {
+      if (filterCat === 'All') return true;
+      const targetCats = getMappedCategories(brandData?.name, filterCat);
+      return targetCats.includes(p.category?.toLowerCase() || '');
+    })
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()));
 
   const sortedAll = [...filtered].sort((a, b) => {
@@ -389,7 +394,8 @@ const BrandPage = () => {
 
       {/* 5. CATEGORY SPECIFIC SECTIONS */}
       {explicitCats.map(cat => {
-        const catProducts = allProducts.filter(p => p.category === cat);
+        const targetCats = getMappedCategories(brandData?.name, cat);
+        const catProducts = allProducts.filter(p => targetCats.includes(p.category?.toLowerCase() || ''));
         if (catProducts.length === 0) return null;
         
         return (

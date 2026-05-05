@@ -4,16 +4,16 @@ import { motion } from 'framer-motion';
 
 const priceDeals = [
   { id: 99,  label: 'Under ₹99',  color: 'bg-[#FFF9C4]', borderColor: 'border-[#FFF176]', textColor: 'text-[#827717]' },
-  { id: 199, label: 'Under ₹199', color: 'bg-[#FCE4EC]', borderColor: 'border-[#F8BBD0]', textColor: 'text-[#880E4F]' },
-  { id: 299, label: 'Under ₹299', color: 'bg-[#E8F5E9]', borderColor: 'border-[#C8E6C9]', textColor: 'text-[#1B5E20]' },
-  { id: 499, label: 'Under ₹499', color: 'bg-[#E3F2FD]', borderColor: 'border-[#BBDEFB]', textColor: 'text-[#0D47A1]' },
+  { id: 299, label: 'Under ₹299', color: 'bg-[#FCE4EC]', borderColor: 'border-[#F8BBD0]', textColor: 'text-[#880E4F]' },
+  { id: 399, label: 'Under ₹399', color: 'bg-[#E8F5E9]', borderColor: 'border-[#C8E6C9]', textColor: 'text-[#1B5E20]' },
+  { id: 599, label: 'Under ₹599', color: 'bg-[#E3F2FD]', borderColor: 'border-[#BBDEFB]', textColor: 'text-[#0D47A1]' },
 ];
 
 const ValueForMoney = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="w-full py-8 md:py-16 bg-background">
+    <section className="w-full pt-2 pb-8 md:pt-4 md:pb-12 bg-background">
       <div className="max-w-7xl mx-auto px-4">
         {/* SECTION TITLE - Align Left for consistency */}
         <div className="text-left mb-8">

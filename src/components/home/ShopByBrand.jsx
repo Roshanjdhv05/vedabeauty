@@ -20,9 +20,9 @@ const ShopByBrand = () => {
   }, []);
 
   return (
-    <section className="pt-2 pb-2 bg-background">
+    <section className="pt-0 pb-2 bg-background">
       <div className="max-w-7xl mx-auto px-4 overflow-hidden">
-        <div className="mb-6">
+        <div className="mb-4">
           <h2 className="text-2xl font-serif font-bold text-black">Brands We Carry</h2>
         </div>
         <div className="overflow-x-auto no-scrollbar scroll-smooth">
@@ -47,7 +47,7 @@ const ShopByBrand = () => {
                     onClick={() => navigate(`/brand/${brand.id}`)}
                     className="flex-shrink-0 flex flex-col items-center gap-6 group cursor-pointer"
                   >
-                    <div className={`relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center transition-all duration-500 group-hover:scale-110 flex-shrink-0 ${
+                    <div className={`relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center transition-all duration-500 group-hover:scale-110 flex-shrink-0 shadow-[0_8px_25px_rgba(0,0,0,0.05)] ${
                       hasCustomLogo 
                         ? 'rounded-full border-[1.5px] border-[#E8B4C0] bg-white overflow-hidden p-2' 
                         : isMars 
