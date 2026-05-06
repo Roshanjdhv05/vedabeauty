@@ -133,7 +133,7 @@ const HeroSection = () => {
                 <img 
                   src="/combo_offer.jpg"
                   alt="Insight Combo Offer"
-                  className="w-full h-full object-cover md:object-contain"
+                  className="w-full h-full object-cover"
                 />
               </motion.div>
             </div>
@@ -189,7 +189,7 @@ const HeroSection = () => {
                 <img 
                   src="/global_dispatch.png"
                   alt="Veda Beauty Global Dispatch"
-                  className="w-full h-full object-cover md:object-contain"
+                  className="w-full h-full object-cover"
                 />
               </motion.div>
             </div>

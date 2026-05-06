@@ -11,7 +11,7 @@ const AdminLogin = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'vedabeauty' && password === '1234567') {
+    if (username === 'vedabeauty' && password === 'vedabeauty231231231') {
       localStorage.setItem('admin_token', 'veda_admin_session_active');
       navigate('/admin/overview');
     } else {

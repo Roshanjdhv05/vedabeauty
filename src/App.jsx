@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import ScrollToTop from './components/layout/ScrollToTop';
 import Home from './pages/Home';
@@ -33,6 +33,7 @@ import AdminCategoryImages from './pages/admin/AdminCategoryImages';
 const AppContent = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.startsWith('/admin');
+  const isAdminAuthenticated = localStorage.getItem('admin_token') === 'veda_admin_session_active';
 
   if (isAdminPath) {
     if (location.pathname === '/admin/login') {
@@ -43,9 +44,15 @@ const AppContent = () => {
       );
     }
 
+    if (!isAdminAuthenticated) {
+      return <Navigate to="/admin/login" replace />;
+    }
+
     return (
       <AdminLayout>
         <Routes>
+          <Route path="/admin" element={<Navigate to="/admin/overview" replace />} />
+          <Route path="/admin/dashboard" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/admin/overview" element={<AdminOverview />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
