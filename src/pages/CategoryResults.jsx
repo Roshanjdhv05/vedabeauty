@@ -6,6 +6,7 @@ import { ChevronLeft, SlidersHorizontal, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getMappedCategories } from '../utils/categoryMapping';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
 
 const CategoryResults = () => {
   const { categoryName, id } = useParams();
@@ -64,6 +65,11 @@ const CategoryResults = () => {
 
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
+      <SEO 
+        title={`Buy ${categoryName} Online`}
+        description={`Explore the best collection of ${categoryName} at Veda Beauty. Shop premium professional quality ${categoryName} online in Thane with fast delivery and amazing offers.`}
+        keywords={`buy ${categoryName} online, professional ${categoryName}, ${categoryName} shop Thane, beauty products India, ${categoryName} essentials, trending ${categoryName}, affordable ${categoryName} India, best ${categoryName} store Thane`}
+      />
       <div className="max-w-7xl mx-auto px-4">
         
         {/* Breadcrumbs */}

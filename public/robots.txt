@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and checkout areas to protect privacy and avoid duplicate content
+Disallow: /admin
+Disallow: /checkout
+Disallow: /profile
+Disallow: /orders
+
+Sitemap: https://vedabeauty.in/sitemap.xml

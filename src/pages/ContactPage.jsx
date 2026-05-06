@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle, AlertCircle, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
 
 /* ─────────────────────────────────────────────
    SEO Meta (injected via document.title)
@@ -44,11 +45,9 @@ const CONTACT_CARDS = [
 const ContactPage = () => {
   const navigate = useNavigate();
 
-  // Update page title
+  // No manual title update needed anymore
   React.useEffect(() => {
-    document.title = PAGE_TITLE;
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', PAGE_DESC);
+    window.scrollTo(0, 0);
   }, []);
 
   const [form, setForm]       = useState({ name: '', email: '', phone: '', message: '' });
@@ -102,6 +101,11 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
+      <SEO 
+        title="Contact Us"
+        description="Get in touch with Veda Beauty. We are located at Jasmine Plaza, Thane West. Call us or drop a message for any inquiries about premium cosmetics."
+        keywords="contact Veda Beauty, cosmetics shop Thane address, beauty products customer service"
+      />
 
       {/* ── HERO ── */}
       <section

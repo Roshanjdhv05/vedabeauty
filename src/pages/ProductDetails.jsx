@@ -18,6 +18,7 @@ import ProductCard from '../components/ui/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import ProductReviews from '../components/product/ProductReviews';
+import SEO from '../components/SEO';
 
 import 'swiper/css';
 import 'swiper/css/pagination';
@@ -236,8 +237,65 @@ const ProductDetails = () => {
     how_to_use: `1. Cleanse your face thoroughly.\n2. Apply a small amount to damp skin.\n3. Gently massage in circular motions for 60 seconds.\n4. Rinse off or leave on as directed.\n5. Follow with moisturiser and SPF.\n\nFor best results, use twice daily — morning and night.`,
   };
 
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": productImages[0],
+    "description": product.description || tabContent.description,
+    "brand": {
+      "@type": "Brand",
+      "name": brandName
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "INR",
+      "price": activePrice,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": avgRating,
+      "reviewCount": reviews.length || 1
+    }
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://vedabeauty.in"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": product.category || "Cosmetics",
+        "item": `https://vedabeauty.in/category/${product.category}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.name,
+        "item": window.location.href
+      }
+    ]
+  };
+
   return (
     <div className="bg-white pb-28 md:pb-12 min-h-screen">
+      <SEO 
+        title={product.name}
+        description={`Buy ${product.name} online at Veda Beauty. Premium quality ${product.category || 'cosmetic'} from ${brandName} at best prices in India. Fast delivery in Thane and Maharashtra.`}
+        image={productImages[0]}
+        keywords={`${product.name}, buy ${product.name} online, ${brandName} cosmetics, ${product.category} Thane, ${brandName} ${product.name}, best ${product.category} India, affordable ${product.category}, premium beauty ${brandName}, buy now ${product.name}, beauty deals online`}
+        schemaData={[productSchema, breadcrumbSchema]}
+      />
 
       {/* ─── Mobile top floating nav ─── */}
       <div className="md:hidden absolute top-20 left-0 w-full z-40 px-4 flex items-center justify-between pointer-events-none">

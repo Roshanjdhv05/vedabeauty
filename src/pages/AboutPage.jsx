@@ -5,21 +5,12 @@ import {
   Heart, ShieldCheck, Truck, Sparkles, 
   CheckCircle2, Users, ShoppingBag, Star, ArrowRight
 } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const AboutPage = () => {
   const navigate = useNavigate();
 
-  // SEO Optimization
   useEffect(() => {
-    document.title = "About Us | Veda Beauty";
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (!metaDescription) {
-      metaDescription = document.createElement('meta');
-      metaDescription.name = "description";
-      document.head.appendChild(metaDescription);
-    }
-    metaDescription.content = "Veda Beauty is your trusted destination for premium cosmetic products. Discover our curated marketplace featuring top beauty brands at affordable prices.";
-    
     window.scrollTo(0, 0);
   }, []);
 
@@ -35,6 +26,11 @@ const AboutPage = () => {
 
   return (
     <div className="min-h-screen bg-white pb-20">
+      <SEO 
+        title="About Us"
+        description="Learn more about Veda Beauty, your trusted destination for premium cosmetics in Thane. Discover our story, mission, and commitment to quality."
+        keywords="about Veda Beauty, premium cosmetics store, beauty marketplace India"
+      />
       
       {/* 1. HERO SECTION */}
       <section className="relative pt-32 pb-20 px-4 bg-gradient-to-b from-[#F8C8DC]/40 to-white overflow-hidden">

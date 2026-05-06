@@ -8,8 +8,65 @@ import ProductCard from '../components/ui/ProductCard';
 import { getProducts } from '../services/productService';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Home = () => {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Veda Beauty",
+    "url": "https://vedabeauty.in",
+    "logo": "https://vedabeauty.in/logo.jpeg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-XXXXXXXXXX",
+      "contactType": "customer service"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Thane West",
+      "addressLocality": "Thane",
+      "addressRegion": "Maharashtra",
+      "postalCode": "400601",
+      "addressCountry": "IN"
+    }
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "BeautySalon",
+    "name": "Veda Beauty Thane",
+    "image": "https://vedabeauty.in/hero_banner.png",
+    "@id": "https://vedabeauty.in",
+    "url": "https://vedabeauty.in",
+    "telephone": "+91-XXXXXXXXXX",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Thane West",
+      "addressLocality": "Thane",
+      "addressRegion": "Maharashtra",
+      "postalCode": "400601",
+      "addressCountry": "IN"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 19.2183,
+      "longitude": 72.9781
+    },
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ],
+      "opens": "10:00",
+      "closes": "21:00"
+    }
+  };
   const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -68,6 +125,12 @@ const Home = () => {
 
   return (
     <div className="w-full max-w-full overflow-x-hidden flex flex-col gap-0 min-h-screen bg-background">
+      <SEO 
+        title="Veda Beauty | Buy Cosmetics Online in Thane | Top Beauty Brands"
+        description="Shop premium cosmetics and beauty products online at Veda Beauty. Explore top brands like Sugar, Insight, and Pilgrim in Thane with fast delivery and great offers."
+        keywords="cosmetics online, beauty products India, makeup store Thane, skincare products, lipstick, foundation, Veda Beauty, buy cosmetics online India, cosmetics shop in Thane, beauty store in Thane West, makeup products Thane, skincare shop near me, online makeup store India, best beauty store India, affordable makeup India"
+        schemaData={[organizationSchema, localBusinessSchema]}
+      />
       {/* 1. HERO SECTION */}
       <HeroSection />
 

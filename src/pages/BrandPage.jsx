@@ -9,6 +9,7 @@ import { getProductsByBrand } from '../services/productService';
 import ProductCard from '../components/ui/ProductCard';
 import { supabase } from '../lib/supabase';
 import { getMappedCategories } from '../utils/categoryMapping';
+import SEO from '../components/SEO';
 
 /* ─────────────────────────────────────────────────
    CONSTANTS & DESIGN SYSTEM
@@ -318,6 +319,12 @@ const BrandPage = () => {
 
   return (
     <div className="bg-white min-h-screen pb-20">
+      <SEO 
+        title={`${brandName} Products Online`}
+        description={`Shop premium ${brandName} cosmetics and beauty products online at Veda Beauty. Explore the full range of ${brandName} skincare and makeup in Thane with fast delivery.`}
+        keywords={`${brandName}, buy ${brandName} online, ${brandName} cosmetics Thane, premium beauty ${brandName}, ${brandName} makeup products, ${brandName} skincare, best deals on ${brandName}, ${brandName} combo offers`}
+        image={brandData?.banner_url || "/brands_banner.png"}
+      />
       
       {/* 1. BRAND HERO SECTION */}
       <BrandHero 
