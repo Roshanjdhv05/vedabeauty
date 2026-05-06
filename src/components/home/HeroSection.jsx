@@ -71,7 +71,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
-                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.25)] bg-white/30"
+                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.25)] bg-transparent"
               >
                 <img 
                   src="/hero_poster.jpg"
@@ -90,7 +90,7 @@ const HeroSection = () => {
           <div className="relative w-full h-full flex flex-col md:flex-row bg-background overflow-hidden">
             
             {/* Desktop Left / Mobile Overlay Content */}
-            <div className="absolute inset-0 md:relative md:w-[45%] h-full flex flex-col justify-center px-6 md:px-20 lg:px-32 py-12 text-left z-10">
+            <div className="absolute inset-0 md:relative md:w-[45%] h-full flex flex-col justify-center px-6 md:px-20 lg:px-32 py-12 text-center md:text-left z-20">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -101,23 +101,24 @@ const HeroSection = () => {
                   Limited Time Deal
                 </span>
                 
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-[#1A1A1A] mb-6 md:mb-8 leading-[1.1]">
-                  Luxury Beauty, <br /> 
-                  <span className="text-[#D4AF37] italic">Now Within Reach</span>
+                <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-bold text-white md:text-[#1A1A1A] mb-6 md:mb-8 leading-[1.1]">
+                  Luxury Beauty, <br className="hidden md:block" /> Now Within Reach
                 </h1>
                 
-                <p className="text-sm md:text-xl text-gray-800 md:text-gray-500 mb-8 md:mb-12 max-w-md font-medium leading-relaxed">
+                <p className="text-sm md:text-xl text-white/80 md:text-gray-500 mb-8 md:mb-12 max-w-md font-medium leading-relaxed">
                   Elevate Your Glow at 30% Off
                 </p>
                 
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: "0 15px 30px -5px rgba(212, 175, 55, 0.4)" }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => navigate('/product/e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d')} 
-                  className="w-fit px-12 py-4.5 bg-[#D4AF37] text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full shadow-[0_10px_20px_-5px_rgba(212, 175, 55, 0.3)] transition-all"
-                >
-                  Buy Now
-                </motion.button>
+                <div className="flex justify-center md:justify-start">
+                  <motion.button
+                    whileHover={{ scale: 1.05, boxShadow: "0 15px 30px -5px rgba(212, 175, 55, 0.4)" }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => navigate('/product/e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d')} 
+                    className="w-fit px-12 py-4.5 bg-[#D4AF37] text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full shadow-[0_10px_20px_-5px_rgba(212, 175, 55, 0.3)] transition-all"
+                  >
+                    Buy Now
+                  </motion.button>
+                </div>
               </motion.div>
             </div>
 
@@ -127,12 +128,12 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
-                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] bg-white/30"
+                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] bg-transparent"
               >
                 <img 
                   src="/combo_offer.jpg"
                   alt="Insight Combo Offer"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover md:object-contain"
                 />
               </motion.div>
             </div>
@@ -140,7 +141,7 @@ const HeroSection = () => {
           </div>
         </SwiperSlide>
 
-        {/* Slide 2: Original Hero - Consistent with others */}
+        {/* Slide 2: Global Dispatch Banner */}
         <SwiperSlide>
           <div className="relative w-full h-full flex flex-col md:flex-row bg-background overflow-hidden">
             
@@ -179,17 +180,16 @@ const HeroSection = () => {
 
             {/* Desktop Right / Mobile Background Image */}
             <div className="w-full md:w-[55%] h-full md:h-full p-0 md:p-10 bg-background flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/40 md:hidden z-10" /> {/* Darker overlay for mobile background image */}
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
-                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] bg-white/30"
+                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] bg-transparent"
               >
                 <img 
-                  src={OLD_BANNER}
-                  alt="Veda Beauty Wholesale"
-                  className="w-full h-full object-cover"
+                  src="/global_dispatch.png"
+                  alt="Veda Beauty Global Dispatch"
+                  className="w-full h-full object-cover md:object-contain"
                 />
               </motion.div>
             </div>

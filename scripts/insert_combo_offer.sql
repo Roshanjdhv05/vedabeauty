@@ -15,7 +15,7 @@ INSERT INTO products (
 ) VALUES (
     'e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d',
     'Insight Luxury Combo Offer',
-    'Experience luxury beauty with our curated Insight Combo. Includes Primer, Foundation, Blusher, and Fixer for the perfect glow.',
+    'Experience luxury beauty with our curated Insight Combo. Includes Primer, Foundation, Compact, Lip Liner, Eyeliner, and Fixer for the perfect professional look.',
     'f1156917-d78d-4f25-95df-1d4b7b6ae163',
     'FACE',
     1265,
@@ -23,7 +23,7 @@ INSERT INTO products (
     885,
     1265,
     30,
-    '/insight_combo_offer.jpg',
+    '/insight_combo_offer.png',
     false
 ) ON CONFLICT (id) DO UPDATE SET
     selling_price = EXCLUDED.selling_price,
