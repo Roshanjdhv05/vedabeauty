@@ -199,6 +199,27 @@ export const getRecommendedProducts = async (excludeId, limit = 8) => {
   return shuffled.slice(0, limit);
 };
 
+export const getOfferProducts = async () => {
+  // First try: fetch products explicitly marked as offers OR with 20%+ discount
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, brands(name, logo_url)')
+    .or('is_offer.eq.true,discount.gte.20')
+    .order('discount', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching offer products:', error);
+    // Fallback: just get products with discount if is_offer column doesn't exist yet
+    const { data: fallback } = await supabase
+      .from('products')
+      .select('*, brands(name, logo_url)')
+      .gte('discount', 20)
+      .order('discount', { ascending: false });
+    return fallback || [];
+  }
+  return data || [];
+};
+
 // --- WISHLIST SERVICES ---
 
 export const getWishlistItems = async (userId) => {

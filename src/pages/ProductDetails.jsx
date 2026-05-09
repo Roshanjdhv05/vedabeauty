@@ -94,8 +94,9 @@ const ProductDetails = () => {
   const [addedToCart, setAddedToCart]   = useState(false);
   const [activeTab, setActiveTab]       = useState('description');
   const [activeSlide, setActiveSlide]   = useState(0);
-  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [selectedVariants, setSelectedVariants] = useState({});
   const [showReturnPolicy, setShowReturnPolicy] = useState(false);
+  const [errorMessage, setErrorMessage]         = useState('');
   const swiperRef                       = useRef(null);
 
   /* ── fetch main product ── */
@@ -136,14 +137,45 @@ const ProductDetails = () => {
     : "4.5"; // Fallback to a nice default if no reviews yet
 
   const handleAddToCart = useCallback(() => {
-    if (product.has_variants && !selectedVariant) {
-      alert('Please select a variant first');
-      return;
+    const variantGroups = {};
+    const variants = product?.product_variants || [];
+    variants.forEach(v => {
+      const g = v.sub_product_name?.trim() || 'Default';
+      if (!variantGroups[g]) variantGroups[g] = [];
+      variantGroups[g].push(v);
+    });
+
+    if (variants.length > 0) {
+      const requiredGroups = Object.keys(variantGroups);
+      const selectedGroups = Object.keys(selectedVariants);
+      const missingGroups = requiredGroups.filter(g => !selectedGroups.includes(g));
+
+      if (missingGroups.length > 0) {
+        // Create a user-friendly error message
+        const missingNames = missingGroups.map(g => g === 'Default' ? 'Variant' : g).join(', ');
+        setErrorMessage(`Please select an option for: ${missingNames}`);
+        setTimeout(() => setErrorMessage(''), 4000);
+        return;
+      }
     }
-    addToCart(product, selectedVariant?.id, selectedVariant);
+
+    // For cart integration, if multiple variants, we combine their names
+    const comboVariantName = Object.entries(selectedVariants)
+      .map(([group, v]) => `${group !== 'Default' ? group + ': ' : ''}${v.name}`)
+      .join(' + ');
+    const firstVariant = Object.values(selectedVariants)[0];
+    
+    // Create a virtual combined variant for the cart
+    const combinedVariant = firstVariant ? {
+      ...firstVariant,
+      id: Object.values(selectedVariants).map(v => v.id).join('-'),
+      name: comboVariantName
+    } : null;
+
+    addToCart(product, combinedVariant?.id, combinedVariant);
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
-  }, [addToCart, product, selectedVariant]);
+  }, [addToCart, product, selectedVariants]);
 
   const isWishlisted = product ? isInWishlist(product.id) : false;
 
@@ -185,8 +217,9 @@ const ProductDetails = () => {
 
   /* ── normalise DB fields ── */
   const variants      = product.product_variants || [];
-  const activePrice   = selectedVariant?.selling_price || selectedVariant?.price || product.selling_price || product.price;
-  const originalPrice = selectedVariant?.mrp_price || product.mrp_price || product.original_price || product.originalPrice;
+  const firstSelected = Object.values(selectedVariants)[0];
+  const activePrice   = firstSelected?.selling_price || firstSelected?.price || product.selling_price || product.price;
+  const originalPrice = firstSelected?.mrp_price || product.mrp_price || product.original_price || product.originalPrice;
   
   // Calculate dynamic discount if mrp and selling price are available
   let discount = product.discount || 0;
@@ -195,6 +228,14 @@ const ProductDetails = () => {
   }
   const brandName     = product.brands?.name || product.brand || '';
   const variantType   = variants[0]?.type || 'shade';
+
+  // Group variants
+  const variantGroups = {};
+  variants.forEach(v => {
+    const groupName = v.sub_product_name?.trim() || 'Default';
+    if (!variantGroups[groupName]) variantGroups[groupName] = [];
+    variantGroups[groupName].push(v);
+  });
 
   // ── Resolve gallery images ──────────────────────────────────────────────
   // For MARS products: use local /mars/ images mapped by name
@@ -432,73 +473,80 @@ const ProductDetails = () => {
             </div>
 
             {/* Variants Selector */}
-            {product.has_variants && variants.length > 0 && (
+            {variants.length > 0 && (
               <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                    Select {variantType === 'shade' ? 'Shade' : variantType === 'size' ? 'Size' : 'Volume'}
-                  </h3>
-                  {selectedVariant && (
-                    <span className="text-xs font-bold text-black">{selectedVariant.name}</span>
-                  )}
-                </div>
-                
-                <div className="flex flex-wrap gap-3 overflow-x-auto no-scrollbar pb-2">
-                  {variants.map((v) => {
-                    const isSelected = selectedVariant?.id === v.id;
+                {Object.entries(variantGroups).map(([groupName, groupVariants]) => (
+                  <div key={groupName} className="mb-6 last:mb-0">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">
+                        Select {groupName !== 'Default' ? groupName : variantType === 'shade' ? 'Shade' : variantType === 'size' ? 'Size' : 'Volume'}
+                      </h3>
+                      {selectedVariants[groupName] && (
+                        <span className="text-xs font-bold text-black">{selectedVariants[groupName].name}</span>
+                      )}
+                    </div>
                     
-                    if (v.type === 'shade') {
-                      return (
-                        <button
-                          key={v.id}
-                          onClick={() => setSelectedVariant(v)}
-                          className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
-                            isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
-                          }`}
-                        >
-                          <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
-                            {v.image_url ? (
-                              <img 
-                                src={v.image_url} 
-                                alt={v.name} 
-                                className="w-full h-full object-cover block"
-                                loading="eager"
-                                onError={(e) => {
-                                  console.log("Image load error for:", v.name);
-                                  e.target.style.display = 'none';
-                                  if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                            ) : null}
-                            <div 
-                              className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
-                              style={{ backgroundColor: v.color_code || '#f3f4f6' }}
+                    <div className="flex flex-wrap gap-3 overflow-x-auto no-scrollbar pb-2">
+                      {groupVariants.map((v) => {
+                        const isSelected = selectedVariants[groupName]?.id === v.id;
+                        
+                        if (v.type === 'shade') {
+                          return (
+                            <button
+                              key={v.id}
+                              onClick={() => {
+                                setSelectedVariants(prev => ({...prev, [groupName]: v}));
+                                setErrorMessage('');
+                              }}
+                              className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
+                                isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
+                              }`}
                             >
-                              {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}
-                            </div>
-                          </div>
-                          <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
-                        </button>
-                      );
-                    }
-                    
-                    return (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedVariant(v)}
-                        className={`flex-shrink-0 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest border-2 transition-all ${
-                          isSelected 
-                            ? 'border-pink-400 bg-pink-50 text-pink-600' 
-                            : 'border-gray-100 bg-white text-gray-400 hover:border-gray-300'
-                        }`}
-                      >
-                        {v.name}
-                      </button>
-                    );
-                  })}
-                </div>
-                
-
+                              <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
+                                {v.image_url ? (
+                                  <img 
+                                    src={v.image_url} 
+                                    alt={v.name} 
+                                    className="w-full h-full object-cover block"
+                                    loading="eager"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div 
+                                  className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
+                                  style={{ backgroundColor: v.color_code || '#f3f4f6' }}
+                                >
+                                  {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}
+                                </div>
+                              </div>
+                              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
+                            </button>
+                          );
+                        }
+                        
+                        return (
+                          <button
+                            key={v.id}
+                            onClick={() => {
+                              setSelectedVariants(prev => ({...prev, [groupName]: v}));
+                              setErrorMessage('');
+                            }}
+                            className={`flex-shrink-0 px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest border-2 transition-all ${
+                              isSelected 
+                                ? 'border-pink-400 bg-pink-50 text-pink-600' 
+                                : 'border-gray-100 bg-white text-gray-400 hover:border-gray-300'
+                            }`}
+                          >
+                            {v.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -535,6 +583,12 @@ const ProductDetails = () => {
             </div>
 
             {/* Desktop CTA buttons */}
+            {errorMessage && (
+              <div className="hidden md:flex items-center gap-2 mt-4 text-red-500 text-[11px] font-bold uppercase tracking-widest bg-red-50 px-4 py-2 rounded-lg border border-red-100 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <Shield className="w-3.5 h-3.5 flex-shrink-0" />
+                {errorMessage}
+              </div>
+            )}
             <div className="hidden md:flex gap-4 mt-4">
               <button
                 onClick={handleAddToCart}
@@ -545,7 +599,7 @@ const ProductDetails = () => {
                 }`}
               >
                 <ShoppingBag className="w-5 h-5" />
-                {addedToCart ? 'Added!' : selectedVariant || !product.has_variants ? 'Add to Cart' : 'Select Variant'}
+                {addedToCart ? 'Added!' : variants.length > 0 ? 'Add to Cart' : 'Add to Cart'}
               </button>
               <button
                 onClick={() => toggleWishlist(product)}
@@ -643,29 +697,33 @@ const ProductDetails = () => {
       />
 
       {/* ─── Mobile sticky CTA ─── */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 flex items-center gap-3 p-4 z-50">
-        <button
-          onClick={() => toggleWishlist(product)}
-          className={`w-14 h-14 border rounded-2xl flex items-center justify-center transition-colors ${
-            isWishlisted ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-        </button>
+      <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 flex flex-col p-4 z-50">
+        {errorMessage && (
+          <div className="flex items-center gap-2 mb-3 text-red-500 text-[10px] font-bold uppercase tracking-widest bg-red-50 px-4 py-2.5 rounded-xl border border-red-100 animate-in fade-in slide-in-from-bottom-1 duration-300">
+            <Shield className="w-3.5 h-3.5 flex-shrink-0" />
+            {errorMessage}
+          </div>
+        )}
+        <div className="flex items-center gap-3 w-full">
+          <button
+            onClick={() => toggleWishlist(product)}
+            className={`flex-shrink-0 w-14 h-14 border rounded-2xl flex items-center justify-center transition-colors ${
+              isWishlisted ? 'border-red-200 bg-red-50' : 'border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <Heart className={`w-6 h-6 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+          </button>
 
-        <button
-          onClick={handleAddToCart}
-          className={`flex-1 h-14 font-bold rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 ${
-            addedToCart ? 'bg-green-500 text-white' : 'bg-black text-white'
-          }`}
-        >
-          <ShoppingBag className="w-5 h-5" />
-          {addedToCart ? 'Added!' : selectedVariant || !product.has_variants ? 'Add to Cart' : 'Select'}
-        </button>
-
-        <button className="flex-1 h-14 bg-[#F8C8DC] text-black font-bold rounded-2xl active:scale-95 transition-transform">
-          Buy Now
-        </button>
+          <button
+            onClick={handleAddToCart}
+            className={`flex-1 h-14 font-bold rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 ${
+              addedToCart ? 'bg-green-500 text-white' : 'bg-black text-white'
+            }`}
+          >
+            <ShoppingBag className="w-5 h-5" />
+            {addedToCart ? 'Added!' : variants.length > 0 ? 'Add to Cart' : 'Add to Cart'}
+          </button>
+        </div>
       </div>
     </div>
   );

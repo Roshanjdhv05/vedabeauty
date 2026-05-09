@@ -85,59 +85,79 @@ const HeroSection = () => {
         </SwiperSlide>
 
 
-        {/* Slide 1: Combo Offer Banner */}
+        {/* Slide 1: Special Offers Banner — Split on Desktop, Full-image on Mobile */}
         <SwiperSlide>
           <div className="relative w-full h-full flex flex-col md:flex-row bg-background overflow-hidden">
-            
-            {/* Desktop Left / Mobile Overlay Content */}
+
+            {/* ── LEFT: Text content (desktop split / mobile glassmorphism overlay) ── */}
             <div className="absolute inset-0 md:relative md:w-[45%] h-full flex flex-col justify-center px-6 md:px-20 lg:px-32 py-12 text-center md:text-left z-20">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="md:bg-transparent bg-white/5 backdrop-blur-[2px] md:backdrop-blur-0 p-8 md:p-0 rounded-[2rem] md:rounded-0 border border-white/10 md:border-none shadow-lg md:shadow-none"
+                className="md:bg-transparent bg-white/5 backdrop-blur-[2px] md:backdrop-blur-0 p-8 md:p-0 rounded-[2rem] md:rounded-none border border-white/10 md:border-none shadow-lg md:shadow-none"
               >
                 <span className="text-[10px] md:text-xs font-bold text-[#D4AF37] tracking-[0.3em] uppercase mb-4 block">
-                  Limited Time Deal
+                  Limited Time Deals
                 </span>
-                
-                <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-bold text-white md:text-[#1A1A1A] mb-6 md:mb-8 leading-[1.1]">
-                  Luxury Beauty, <br className="hidden md:block" /> Now Within Reach
+
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-[#1A1A1A] mb-4 md:mb-6 leading-[1.1]">
+                  Special <br className="hidden md:block" />
+                  <span className="text-[#D4AF37] italic">Combo</span> <br className="hidden md:block" />
+                  Offers
                 </h1>
-                
-                <p className="text-sm md:text-xl text-white/80 md:text-gray-500 mb-8 md:mb-12 max-w-md font-medium leading-relaxed">
-                  Elevate Your Glow at 30% Off
+
+                <p className="text-sm md:text-lg text-gray-800 md:text-gray-500 mb-8 md:mb-10 max-w-md font-medium leading-relaxed">
+                  Handpicked combos from top brands — up to 30% off. Grab yours before they're gone!
                 </p>
-                
+
+                {/* Offer pills — desktop only */}
+                <div className="hidden md:flex flex-wrap gap-2 mb-8">
+                  {['Insight 30% OFF', 'SugarPop 20% OFF', 'Mars 25% OFF', 'Pilgrim 25% OFF'].map(label => (
+                    <span key={label} className="text-[10px] font-bold bg-[#D4AF37]/10 text-[#c49b2e] border border-[#D4AF37]/30 px-3 py-1 rounded-full uppercase tracking-wide">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+
                 <div className="flex justify-center md:justify-start">
                   <motion.button
-                    whileHover={{ scale: 1.05, boxShadow: "0 15px 30px -5px rgba(212, 175, 55, 0.4)" }}
+                    whileHover={{ scale: 1.05, boxShadow: '0 15px 30px -5px rgba(212,175,55,0.4)' }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => navigate('/product/e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d')} 
-                    className="w-fit px-12 py-4.5 bg-[#D4AF37] text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full shadow-[0_10px_20px_-5px_rgba(212, 175, 55, 0.3)] transition-all"
+                    onClick={() => navigate('/offers')}
+                    className="w-fit px-10 py-4 bg-[#D4AF37] text-white text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] rounded-full shadow-[0_10px_20px_-5px_rgba(212,175,55,0.3)] transition-all"
+                    id="hero-offer-banner-cta"
                   >
-                    Buy Now
+                    🎁 Shop All Offers
                   </motion.button>
                 </div>
               </motion.div>
             </div>
 
-            {/* Desktop Right / Mobile Background Image */}
-            <div className="w-full md:w-[55%] h-full md:h-full p-0 md:p-10 bg-background flex items-center justify-center">
-              <motion.div 
+            {/* ── RIGHT: offer.png image (desktop only as split panel, mobile as background) ── */}
+            <div className="w-full md:w-[55%] h-full p-0 md:p-10 bg-background flex items-center justify-center">
+              <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 1 }}
-                className="w-full h-full md:h-full md:aspect-square md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.3)] bg-transparent"
+                className="w-full h-full md:w-fit md:h-fit md:max-w-full md:max-h-full md:rounded-[2.5rem] overflow-hidden md:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.25)] bg-transparent cursor-pointer flex items-center justify-center"
+                onClick={() => navigate('/offers')}
               >
-                <img 
-                  src="/combo_offer.jpg"
-                  alt="Insight Combo Offer"
-                  className="w-full h-full object-cover"
+                {/* Mobile background image */}
+                <img
+                  src="/offer.png"
+                  alt="Special Combo Offers"
+                  className="w-full h-full object-cover object-center md:hidden"
+                />
+                {/* Desktop right-panel image */}
+                <img
+                  src="/offerban.png"
+                  alt="Special Combo Offers"
+                  className="hidden md:block w-auto h-auto max-w-full max-h-full object-contain object-center"
                 />
               </motion.div>
             </div>
-            
+
           </div>
         </SwiperSlide>
 
@@ -157,11 +177,11 @@ const HeroSection = () => {
                   Business Ready Shipping
                 </span>
                 
-                <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-bold text-white md:text-[#1A1A1A] mb-6 md:mb-8 leading-[1.1]">
+                <h1 className="text-3xl md:text-5xl lg:text-7xl font-serif font-bold text-[#1A1A1A] mb-6 md:mb-8 leading-[1.1]">
                   Fast Global Dispatch <br className="hidden md:block" /> & Bulk Loyalty
                 </h1>
                 
-                <p className="text-sm md:text-xl text-white/80 md:text-gray-500 mb-8 md:mb-12 max-w-md font-medium leading-relaxed">
+                <p className="text-sm md:text-xl text-gray-800 md:text-gray-500 mb-8 md:mb-12 max-w-md font-medium leading-relaxed">
                   Priority shipping within 24 hours for all professional orders.
                 </p>
                 

@@ -80,6 +80,28 @@ const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.name}</p>
+                        {(item.variant?.name || item.variant_name) && (
+                           <div className="mt-1 mb-1.5 p-3 bg-pink-50/50 rounded-xl border border-pink-100">
+                             <p className="text-[9px] text-pink-500 font-bold uppercase tracking-widest mb-2 border-b border-pink-100/50 pb-1">Selected Items:</p>
+                             <div className="space-y-2">
+                               {(item.variant?.name || item.variant_name).split('+').map((v, idx) => {
+                                 const parts = v.split(':');
+                                 if (parts.length === 2) {
+                                   return (
+                                     <div key={idx} className="flex flex-col">
+                                       <span className="text-[10px] font-bold text-gray-800">{parts[0].trim()}</span>
+                                       <span className="text-[10px] font-semibold text-gray-500 italic flex items-center gap-1">
+                                          <div className="w-1 h-1 rounded-full bg-pink-300 ml-1"></div>
+                                          {parts[1].trim()}
+                                       </span>
+                                     </div>
+                                   );
+                                 }
+                                 return <div key={idx} className="text-[10px] font-semibold text-gray-600">• {v.trim()}</div>;
+                               })}
+                             </div>
+                           </div>
+                        )}
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Qty: {item.quantity} × ₹{item.price}</p>
                       </div>
                       <p className="text-sm font-bold text-gray-900">₹{item.price * item.quantity}</p>

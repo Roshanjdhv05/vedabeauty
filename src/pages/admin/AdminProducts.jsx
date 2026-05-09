@@ -42,7 +42,9 @@ const AdminProducts = () => {
     price: '',
     image_url: '',
     description: '',
-    has_variants: false
+    has_variants: false,
+    is_offer: false,
+    discount: 0
   };
   const [productForm, setProductForm] = useState(defaultProductForm);
   const [productVariants, setProductVariants] = useState([]);
@@ -52,7 +54,8 @@ const AdminProducts = () => {
     color_code: '',
     image_url: '',
     price: '',
-    stock: 0
+    stock: 0,
+    sub_product_name: ''
   });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
   const [isSavingBrand, setIsSavingBrand] = useState(false);
@@ -123,7 +126,9 @@ const AdminProducts = () => {
       price: product.price || '',
       image_url: product.image_url || product.image || '',
       description: product.description || '',
-      has_variants: product.has_variants || false
+      has_variants: product.has_variants || false,
+      is_offer: product.is_offer || false,
+      discount: product.discount || 0
     });
     // Fetch variants for this product
     fetchProductVariants(product.id);
@@ -762,6 +767,19 @@ const AdminProducts = () => {
                         <h4 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Variant Builder</h4>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                          {/* ONLY FOR OFFERS: Combo Item Name */}
+                          {(productForm.brand_name === 'Offer' || productForm.is_offer) && (
+                            <div className="col-span-1 md:col-span-3">
+                              <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Combo Product Name (e.g. Liquid Foundation)</label>
+                              <input 
+                                type="text"
+                                placeholder="Enter the product name this shade belongs to..."
+                                value={newVariant.sub_product_name || ''}
+                                onChange={(e) => setNewVariant({...newVariant, sub_product_name: e.target.value})}
+                                className="w-full bg-gray-50 border border-gray-100 rounded-xl py-3 px-4 text-xs focus:outline-none focus:border-accent/50"
+                              />
+                            </div>
+                          )}
                           <div className="col-span-1">
                             <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-2">Variant Name</label>
                             <input 
@@ -840,7 +858,7 @@ const AdminProducts = () => {
                               onClick={() => {
                                 if (!newVariant.name) return alert('Variant name is required');
                                 setProductVariants([...productVariants, { ...newVariant }]);
-                                setNewVariant({ name: '', type: 'shade', color_code: '', image_url: '', price: '' });
+                                setNewVariant({ name: '', type: 'shade', color_code: '', image_url: '', price: '', sub_product_name: '' });
                               }}
                               className="w-full bg-black text-white py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-accent hover:text-black transition-all"
                             >
@@ -866,16 +884,17 @@ const AdminProducts = () => {
                                   <div className="flex flex-col">
                                     <span className="text-xs font-bold text-gray-900">{v.name}</span>
                                     <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">
-                                      {v.type} {v.price ? `• ₹${v.price}` : ''}
+                                      {v.type} {v.price ? `• ₹${v.price}` : ''} {v.sub_product_name ? `• ${v.sub_product_name}` : ''}
                                     </span>
                                   </div>
                                 </div>
                                 <button 
                                   type="button"
                                   onClick={() => setProductVariants(productVariants.filter((_, i) => i !== idx))}
-                                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                                  className="px-3 py-2 flex items-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-[10px] font-bold uppercase tracking-widest"
+                                  title="Delete Variant"
                                 >
-                                  <X size={14} />
+                                  <Trash2 size={14} /> Delete
                                 </button>
                               </div>
                             ))}

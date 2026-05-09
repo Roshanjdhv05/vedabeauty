@@ -23,6 +23,7 @@ import InvoicePage from './pages/InvoicePage';
 import BrandsPage from './pages/BrandsPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import OffersPage from './pages/OffersPage';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -96,6 +97,7 @@ const AppContent = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/brands" element={<BrandsPage />} />
+        <Route path="/offers" element={<OffersPage />} />
       </Routes>
     </MainLayout>
   );

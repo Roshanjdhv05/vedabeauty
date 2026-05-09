@@ -4,6 +4,7 @@ import ShopByBrand from '../components/home/ShopByBrand';
 import ShopByCategory from '../components/home/ShopByCategory';
 import ProductSection from '../components/home/ProductSection';
 import ValueForMoney from '../components/home/ValueForMoney';
+import OfferSection from '../components/home/OfferSection';
 import ProductCard from '../components/ui/ProductCard';
 import { getProducts } from '../services/productService';
 import { useNavigate } from 'react-router-dom';
@@ -140,7 +141,10 @@ const Home = () => {
       {/* 3. SHOP BY BRAND */}
       <ShopByBrand />
 
-      {/* 4. VALUE FOR MONEY SECTION */}
+      {/* 4. OFFER SECTION */}
+      <OfferSection />
+
+      {/* 5. VALUE FOR MONEY SECTION */}
       <ValueForMoney />
 
       {/* 5. FEATURED SECTIONS */}

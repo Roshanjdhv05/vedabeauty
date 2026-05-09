@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, ChevronRight, LayoutGrid, Package, Info, PhoneCall } from 'lucide-react';
+import { Search, ShoppingCart, User, Heart, Menu, X, LogOut, ChevronRight, LayoutGrid, Package, Info, PhoneCall, Tag } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
@@ -29,6 +29,8 @@ const Navbar = () => {
     { name: 'About Veda', path: '/about', icon: <Info size={18} /> },
     { name: 'Contact Us', path: '/contact', icon: <PhoneCall size={18} /> },
   ];
+
+  const offersLink = { name: '🎁 Offers', path: '/offers', icon: <Tag size={18} /> };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -79,6 +81,15 @@ const Navbar = () => {
 
         {/* Desktop Nav Links */}
         <div className="hidden lg:flex items-center gap-8 mx-6">
+          {/* Offers link — highlighted */}
+          <Link
+            to="/offers"
+            className="text-[10px] font-bold uppercase tracking-[0.2em] text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1 animate-pulse"
+            id="nav-offers-link"
+          >
+            <Tag size={12} strokeWidth={2.5} />
+            Offers
+          </Link>
           {navLinks.map((link) => (
             <Link 
               key={link.name} 
@@ -200,6 +211,25 @@ const Navbar = () => {
                       <ChevronRight size={16} className="text-black/20" />
                     </Link>
                   ))}
+
+                  {/* Offers — special highlighted link */}
+                  <Link
+                    to="/offers"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 border border-rose-100 transition-colors group"
+                    id="mobile-nav-offers-link"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center text-white">
+                        <Tag size={18} />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-rose-600 uppercase tracking-widest">🎁 Offers</span>
+                        <p className="text-[10px] text-rose-400 font-medium">Combo deals & discounts</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-rose-300" />
+                  </Link>
 
                   <div className="my-4 border-t border-black/5 pt-4">
                     <Link
