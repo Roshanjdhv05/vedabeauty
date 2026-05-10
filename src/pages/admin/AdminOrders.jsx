@@ -206,14 +206,13 @@ const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
                  </h3>
                  <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Items Total</span>
-                      <span className="font-bold">₹{order.total_amount - Math.round(order.total_amount * 0.15)}</span>
+                      <span className="text-gray-400">Total Amount</span>
+                      <span className="font-bold">₹{order.total_amount}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">GST & Taxes</span>
-                      <span className="font-bold">₹{Math.round(order.total_amount * 0.15)}</span>
+                    <div className="flex justify-center py-2">
+                       <span className="text-[9px] font-bold text-green-600 uppercase tracking-widest">Taxes are included</span>
                     </div>
-                    <div className="pt-4 border-t border-gray-50 flex justify-between items-center mt-4">
+                    <div className="pt-4 border-t border-gray-50 flex justify-between items-center mt-2">
                       <span className="text-xs font-bold uppercase tracking-widest">Paid via COD</span>
                       <span className="text-xl font-bold text-black">₹{order.total_amount}</span>
                     </div>

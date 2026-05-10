@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Camera, Send, Play, Mail, Phone, MapPin } from 'lucide-react';
+import { Camera, MessageSquare, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -15,11 +15,25 @@ const Footer = () => {
             <p className="text-gray-400 text-sm leading-relaxed">
               Your one-stop destination for premium, multi-brand organic and luxury cosmetics. Natural beauty, redefined.
             </p>
-            <div className="flex items-center gap-4 pt-2">
-              <a href="#" className="hover:text-[var(--primary)] transition-colors"><Camera className="w-5 h-5" /></a>
-              <a href="#" className="hover:text-[var(--primary)] transition-colors"><MessageSquare className="w-5 h-5" /></a>
-              <a href="#" className="hover:text-[var(--primary)] transition-colors"><Send className="w-5 h-5" /></a>
-              <a href="#" className="hover:text-[var(--primary)] transition-colors"><Play className="w-5 h-5" /></a>
+            <div className="flex items-center gap-6 pt-2">
+              <a 
+                href="https://www.instagram.com/vedabeauty.in/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-[var(--primary)] transition-all transform hover:scale-110"
+                title="Follow us on Instagram"
+              >
+                <Camera className="w-5 h-5" />
+              </a>
+              <a 
+                href="https://wa.me/918169292310" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-[var(--primary)] transition-all transform hover:scale-110"
+                title="Chat with us on WhatsApp"
+              >
+                <MessageSquare className="w-5 h-5" />
+              </a>
             </div>
           </div>
 
@@ -39,11 +53,16 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-bold mb-6 text-[var(--primary)]">Customer Care</h3>
             <ul className="space-y-3 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Track Your Order</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Returns & Exchanges</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Shipping Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQs</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><a href="/profile" className="hover:text-white transition-colors">Track Your Order</a></li>
+              <li><a href="/profile" className="hover:text-white transition-colors">Returns & Exchanges</a></li>
+              <li className="pt-4 border-t border-gray-800/50">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-white uppercase tracking-widest">Return Exceptions</p>
+                  <p className="text-[10px] leading-relaxed text-gray-500 italic">
+                    Products with damage, products with expiry, or products different from the order are accepted, else not.
+                  </p>
+                </div>
+              </li>
             </ul>
           </div>
 

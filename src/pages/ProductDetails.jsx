@@ -486,44 +486,48 @@ const ProductDetails = () => {
                       )}
                     </div>
                     
-                    <div className="flex flex-wrap gap-3 overflow-x-auto no-scrollbar pb-2">
+                    <div className="flex flex-nowrap md:flex-wrap gap-3 overflow-x-auto no-scrollbar pb-2">
                       {groupVariants.map((v) => {
                         const isSelected = selectedVariants[groupName]?.id === v.id;
                         
                         if (v.type === 'shade') {
                           return (
-                            <button
-                              key={v.id}
-                              onClick={() => {
-                                setSelectedVariants(prev => ({...prev, [groupName]: v}));
-                                setErrorMessage('');
-                              }}
-                              className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
-                                isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
-                              }`}
-                            >
-                              <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
-                                {v.image_url ? (
-                                  <img 
-                                    src={v.image_url} 
-                                    alt={v.name} 
-                                    className="w-full h-full object-cover block"
-                                    loading="eager"
-                                    onError={(e) => {
-                                      e.target.style.display = 'none';
-                                      if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
-                                    }}
-                                  />
-                                ) : null}
-                                <div 
-                                  className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
-                                  style={{ backgroundColor: v.color_code || '#f3f4f6' }}
-                                >
-                                  {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}
+                            <div key={v.id} className="flex flex-col items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedVariants(prev => ({...prev, [groupName]: v}));
+                                  setErrorMessage('');
+                                }}
+                                className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
+                                  isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
+                                }`}
+                              >
+                                <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
+                                  {v.image_url ? (
+                                    <img 
+                                      src={v.image_url} 
+                                      alt={v.name} 
+                                      className="w-full h-full object-cover block"
+                                      loading="eager"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                  ) : null}
+                                  <div 
+                                    className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
+                                    style={{ backgroundColor: v.color_code || '#f3f4f6' }}
+                                  >
+                                    {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
-                            </button>
+                                <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 transition-all ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`} />
+                              </button>
+                              <span className={`text-[9px] font-bold text-center w-14 line-clamp-2 leading-tight uppercase tracking-tighter ${isSelected ? 'text-pink-600' : 'text-gray-400'}`}>
+                                {v.name}
+                              </span>
+                            </div>
                           );
                         }
                         

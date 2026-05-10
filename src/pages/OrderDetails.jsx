@@ -224,7 +224,7 @@ const OrderDetails = () => {
            <h3 className="text-sm font-bold text-[#DB2777] uppercase tracking-widest mb-6">Payment Summary</h3>
            <div className="space-y-3">
               <div className="flex justify-between text-xs font-medium text-gray-400">
-                <span>Subtotal (incl. GST)</span>
+                <span>Subtotal</span>
                 <span>₹{(order.total_amount - (order.shipping_fee || 0)).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs font-medium text-gray-400">
@@ -235,9 +235,14 @@ const OrderDetails = () => {
                   <span className="text-[#D4AF37]">FREE</span>
                 )}
               </div>
-              <div className="pt-4 mt-4 border-t border-gray-50 flex justify-between items-center">
-                <span className="text-sm font-bold text-gray-900 uppercase tracking-widest">Grand Total</span>
-                <span className="text-xl font-black text-[#DB2777]">₹{order.total_amount}.00</span>
+              <div className="pt-4 mt-4 border-t border-gray-50">
+                <div className="flex justify-center mb-2">
+                  <span className="text-[9px] font-bold text-green-600 uppercase tracking-widest">Tax are included in this order</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-gray-900 uppercase tracking-widest">Grand Total</span>
+                  <span className="text-xl font-black text-[#DB2777]">₹{order.total_amount}.00</span>
+                </div>
               </div>
            </div>
         </div>

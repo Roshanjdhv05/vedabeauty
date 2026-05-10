@@ -34,7 +34,7 @@ const CartPage = () => {
     setIsSubmitting(true);
     
     const shippingFee = cartTotal < 500 ? 60 : 0;
-    const totalAmount = Math.round(cartTotal * 1.18) + shippingFee;
+    const totalAmount = cartTotal + shippingFee;
     const itemsCount = cart.reduce((total, item) => total + item.quantity, 0);
     
     const orderData = {
@@ -271,15 +271,16 @@ const CartPage = () => {
                   <span className="text-green-600 font-bold uppercase tracking-widest text-[10px]">Free</span>
                 )}
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500 font-medium">GST (18%)</span>
-                <span className="text-black font-bold">₹{(cartTotal * 0.18).toFixed(0)}</span>
-              </div>
-              <div className="pt-4 mt-4 border-t border-gray-200 flex justify-between items-center">
-                <span className="text-lg font-bold">Grand Total</span>
-                <span className="text-2xl font-bold text-black">
-                  ₹{(cartTotal * 1.18 + (cartTotal < 500 ? 60 : 0)).toFixed(0)}
-                </span>
+              <div className="pt-4 mt-4 border-t border-gray-200">
+                <div className="flex justify-center mb-2">
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Tax are included in this order</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-bold">Grand Total</span>
+                  <span className="text-2xl font-bold text-black">
+                    ₹{(cartTotal + (cartTotal < 500 ? 60 : 0)).toFixed(0)}
+                  </span>
+                </div>
               </div>
             </div>
             
