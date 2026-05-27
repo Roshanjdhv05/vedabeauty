@@ -37,7 +37,7 @@ const ValueForMoney = () => {
               whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate(`/deals?price=${deal.id}`)}
-              className={`${deal.color} ${deal.borderColor} border-2 rounded-[2rem] p-5 flex justify-between items-center cursor-pointer transition-all shadow-sm hover:shadow-xl w-full max-w-[250px] md:max-w-full relative overflow-hidden group`}
+              className={`${deal.color} ${deal.borderColor} border-2 rounded-[2rem] p-5 flex justify-between items-center cursor-pointer transition-all shadow-sm hover:shadow-xl w-full relative overflow-hidden group`}
             >
               <div className="relative z-10 flex-1 min-w-0">
                 <h3 className={`text-xl md:text-2xl font-bold ${deal.textColor} truncate font-serif`}>

@@ -78,8 +78,6 @@ const ShopByBrand = () => {
                 );
               })
             )}
-            {/* Physical spacer for consistent end-padding */}
-            <div className="w-12 flex-shrink-0" aria-hidden="true" />
           </div>
         </div>
       </div>

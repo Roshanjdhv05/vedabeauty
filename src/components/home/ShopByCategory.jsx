@@ -41,9 +41,9 @@ const ShopByCategory = () => {
   }, []);
 
   return (
-    <section className="pt-0 pb-2 bg-background">
+    <section className="pt-8 md:pt-12 pb-2 bg-background">
       <div className="max-w-7xl mx-auto px-4 overflow-hidden">
-        <h2 className="text-3xl md:text-5xl font-serif font-medium text-center mb-6 text-[#333]">
+        <h2 className="text-3xl md:text-5xl font-serif font-medium text-left mb-6 text-[#333]">
           Shop by Category
         </h2>
         
@@ -81,8 +81,6 @@ const ShopByCategory = () => {
                 </motion.div>
               ))
             )}
-            {/* Physical spacer for consistent end-padding */}
-            <div className="w-12 flex-shrink-0" aria-hidden="true" />
           </div>
         </div>
         

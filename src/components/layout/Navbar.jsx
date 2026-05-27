@@ -110,40 +110,14 @@ const Navbar = () => {
             <Search size={18} />
           </button>
 
-          {/* User Account */}
-          <div className="relative group">
-            {user ? (
-              <div className="relative">
-                <button 
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="p-1.5 bg-white/10 rounded-full border border-white/10 hover:bg-white/20 transition-all"
-                >
-                  <User size={16} className="text-accent" />
-                </button>
-                
-                {/* User Dropdown */}
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white text-black rounded-2xl shadow-2xl border border-black/5 overflow-hidden opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <div className="px-4 py-3 bg-gray-50 border-b border-black/5">
-                    <p className="text-[9px] font-bold text-black/40 uppercase tracking-widest">Signed in as</p>
-                    <p className="text-xs font-bold truncate">{user.email}</p>
-                  </div>
-                  <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest hover:bg-accent/5 transition-colors">
-                    <User size={14} /> Profile
-                  </Link>
-                  <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold uppercase tracking-widest text-red-600 hover:bg-red-50 transition-colors border-t border-black/5"
-                  >
-                    <LogOut size={14} /> Logout
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <Link to="/login" className="hidden sm:block px-6 py-2 bg-white text-black text-[10px] font-bold uppercase tracking-widest rounded-full hover:bg-accent hover:text-white transition-all">
-                Login
-              </Link>
-            )}
-          </div>
+          {/* Track Order */}
+          <Link 
+            to="/orders" 
+            className="p-1.5 bg-white/10 rounded-full border border-white/10 hover:bg-white/20 transition-all flex items-center justify-center"
+            title="Track Order"
+          >
+            <Package size={16} className="text-accent" />
+          </Link>
           
           <div className="flex items-center gap-1 md:gap-4">
             <Link to="/wishlist" className="relative p-1.5 text-white/80">
