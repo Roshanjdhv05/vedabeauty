@@ -4,8 +4,8 @@
   "description": "Premium Beauty Store",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#F8C8DC",
+  "background_color": "#f8c8d8",
+  "theme_color": "#111111",
   "orientation": "portrait",
   "icons": [
     {

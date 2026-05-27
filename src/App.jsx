@@ -24,6 +24,7 @@ import BrandsPage from './pages/BrandsPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import OffersPage from './pages/OffersPage';
+import PWAInstallBanner from './components/layout/PWAInstallBanner';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -107,6 +108,7 @@ function App() {
   return (
     <Router>
       <AppContent />
+      <PWAInstallBanner />
     </Router>
   );
 }
