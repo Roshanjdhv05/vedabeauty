@@ -128,7 +128,7 @@ const Home = () => {
     <div className="w-full max-w-full overflow-x-hidden flex flex-col gap-0 min-h-screen bg-background">
       <SEO 
         title="Veda Beauty | Buy Cosmetics Online in Thane | Top Beauty Brands"
-        description="Shop premium cosmetics and beauty products online at Veda Beauty. Explore top brands like Sugar, Insight, and Pilgrim in Thane with fast delivery and great offers."
+        description="Shop premium cosmetics and beauty products online at Veda Beauty. Explore top brands like Insight, Mars, and Pilgrim in Thane with fast delivery and great offers."
         keywords="cosmetics online, beauty products India, makeup store Thane, skincare products, lipstick, foundation, Veda Beauty, buy cosmetics online India, cosmetics shop in Thane, beauty store in Thane West, makeup products Thane, skincare shop near me, online makeup store India, best beauty store India, affordable makeup India"
         schemaData={[organizationSchema, localBusinessSchema]}
       />

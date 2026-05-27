@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
+import SmartProductImage from '../components/ui/SmartProductImage';
 
 const TrackingStepper = ({ status }) => {
   const stages = [
@@ -161,7 +163,12 @@ const OrderDetails = () => {
            {items.map((item, i) => (
              <div key={i} className="bg-white p-4 rounded-xl shadow-sm border border-gray-50 flex gap-4">
                 <div className="w-16 h-16 rounded-lg bg-gray-50 overflow-hidden border border-gray-100 flex-shrink-0">
-                  <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                  <SmartProductImage
+                    candidates={getCartItemImageCandidates(item)}
+                    fallbackSrc={FALLBACK_IMAGE}
+                    alt={item.name}
+                    objectFit="cover"
+                  />
                 </div>
                 <div className="flex-1">
                    <div className="flex justify-between items-start">

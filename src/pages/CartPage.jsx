@@ -5,6 +5,8 @@ import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, MapPin, Building, Home, C
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createOrder } from '../services/orderService';
+import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
+import SmartProductImage from '../components/ui/SmartProductImage';
 
 const CartPage = () => {
   const { cart, removeFromCart, cartTotal, addToCart, clearCart } = useCart();
@@ -131,7 +133,12 @@ const CartPage = () => {
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-4 md:gap-6 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
-                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      <SmartProductImage
+                        candidates={getCartItemImageCandidates(item)}
+                        fallbackSrc={FALLBACK_IMAGE}
+                        alt={item.name}
+                        objectFit="cover"
+                      />
                     </div>
                     
                     <div className="flex-1 flex flex-col justify-between py-1">

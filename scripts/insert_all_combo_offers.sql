@@ -55,10 +55,10 @@ INSERT INTO products (
     'Insight',
     'FACE',
     1163,
-    814,
-    814,
+    885,
+    885,
     1163,
-    30,
+    24,
     '/insight_combo_offer.png',
     false,
     true
@@ -75,51 +75,6 @@ INSERT INTO products (
     image_url       = EXCLUDED.image_url,
     is_offer        = EXCLUDED.is_offer;
 
-
--- ── 2. SUGAR POP — 5 Minute College Ready Kit ──────────────
-INSERT INTO products (
-    id,
-    name,
-    description,
-    brand_id,
-    brand_name,
-    category,
-    mrp_price,
-    selling_price,
-    price,
-    original_price,
-    discount,
-    image_url,
-    has_variants,
-    is_offer
-) VALUES (
-    'a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e',
-    '5 Minute College Ready Kit',
-    'Get that effortless, campus-ready look in just 5 minutes with Sugar Pop''s curated college kit. Your ultimate go-to combo for busy mornings — lightweight, long-lasting, and budget-friendly.',
-    -- Replace with actual Sugar Pop brand ID from your DB:
-    (SELECT id FROM brands WHERE name = 'Sugar Pop' LIMIT 1),
-    'Sugar Pop',
-    'FACE',
-    1076,
-    860,
-    860,
-    1076,
-    20,
-    '/sugarpop_combo_offer.png',
-    false,
-    true
-) ON CONFLICT (id) DO UPDATE SET
-    name            = EXCLUDED.name,
-    description     = EXCLUDED.description,
-    brand_id        = EXCLUDED.brand_id,
-    brand_name      = EXCLUDED.brand_name,
-    mrp_price       = EXCLUDED.mrp_price,
-    selling_price   = EXCLUDED.selling_price,
-    price           = EXCLUDED.price,
-    original_price  = EXCLUDED.original_price,
-    discount        = EXCLUDED.discount,
-    image_url       = EXCLUDED.image_url,
-    is_offer        = EXCLUDED.is_offer;
 
 
 -- ── 3. MARS — 5 Minutes Daily Makeup Kit ───────────────────

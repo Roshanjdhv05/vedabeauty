@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tag, Sparkles, ShoppingBag, Zap } from 'lucide-react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/autoplay';
 
 const offers = [
   {
@@ -10,28 +15,13 @@ const offers = [
     desc: 'A curated professional combo — everything you need for a flawless look, bundled together for maximum savings.',
     image: '/insight_combo_offer.png',
     mrp: 1163,
-    price: 814,
+    price: 885,
     route: '/product/e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d',
     accent: '#e95578',
     accentDark: '#c2185b',
     accentLight: '#fce8ef',
     accentShadow: 'rgba(233,85,120,',
     glow: 'rgba(233,85,120,0.13)',
-  },
-  {
-    id: 'sugarpop',
-    brand: 'SugarPop',
-    name: '5 Minute College Ready Kit',
-    desc: 'Get that effortless, campus-ready look in just 5 minutes — your ultimate go-to combo for busy mornings.',
-    image: '/sugarpop_combo_offer.png',
-    mrp: 1076,
-    price: 860,
-    route: '/product/a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e',
-    accent: '#f97316',
-    accentDark: '#c2410c',
-    accentLight: '#fff4ed',
-    accentShadow: 'rgba(249,115,22,',
-    glow: 'rgba(249,115,22,0.12)',
   },
   {
     id: 'mars',
@@ -90,14 +80,13 @@ const OfferCard = ({ offer }) => {
         <span>{discount}% OFF</span>
       </div>
 
-      {/* Image */}
+      {/* Image Panel */}
       <div className="oc-image-wrap">
         <img
           src={offer.image}
           alt={offer.name}
           className="oc-image"
         />
-        <div className="oc-image-overlay" />
       </div>
 
       {/* Content */}
@@ -149,11 +138,24 @@ const OfferSection = () => {
         <p className="os-sub">Handpicked brand combos at unbeatable prices — limited time only</p>
       </div>
 
-      {/* Cards grid */}
-      <div className="os-grid">
-        {offers.map(offer => (
-          <OfferCard key={offer.id} offer={offer} />
-        ))}
+      {/* Cards slider */}
+      <div className="os-slider-container">
+        <Swiper
+          modules={[Autoplay, Pagination]}
+          slidesPerView={1}
+          spaceBetween={24}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          pagination={{ clickable: true, dynamicBullets: true }}
+          className="os-swiper"
+        >
+          {offers.map(offer => (
+            <SwiperSlide key={offer.id}>
+              <div style={{ maxWidth: '1250px', margin: '0 auto' }}>
+                <OfferCard offer={offer} />
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
 
       <style>{`
@@ -193,7 +195,7 @@ const OfferSection = () => {
 
         /* ── Header ── */
         .os-header {
-          max-width: 1100px;
+          max-width: 1250px;
           margin: 0 auto 48px;
           text-align: center;
           position: relative;
@@ -229,27 +231,28 @@ const OfferSection = () => {
           font-weight: 500;
         }
 
-        /* ── Grid ── */
-        .os-grid {
-          max-width: 1100px;
+        /* ── Slider Container ── */
+        .os-slider-container {
+          max-width: 1250px;
           margin: 0 auto;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 24px;
           position: relative;
           z-index: 1;
+        }
+        .os-swiper {
+          padding-bottom: 50px !important;
         }
 
         /* ── Card ── */
         .oc-card {
           position: relative;
           background: #fff;
-          border-radius: 24px;
+          border-radius: 28px;
           border: 1.5px solid rgba(0,0,0,0.06);
           overflow: hidden;
           display: flex;
           flex-direction: row;
           align-items: stretch;
+          min-height: 400px;
           box-shadow: 0 6px 30px rgba(0,0,0,0.07);
           transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1),
                       box-shadow 0.35s ease,
@@ -278,7 +281,7 @@ const OfferSection = () => {
           text-transform: uppercase;
           padding: 4px 10px;
           border-radius: 999px;
-          z-index: 3;
+          z-index: 10;
           box-shadow: 0 3px 12px rgba(0,0,0,0.18);
           animation: oc-pulse 2.8s ease-in-out infinite;
         }
@@ -287,57 +290,58 @@ const OfferSection = () => {
           50% { opacity: 0.88; transform: scale(1.04); }
         }
 
-        /* ── Image ── */
+        /* ── Image Panel (left) ── */
         .oc-image-wrap {
-          position: relative;
-          width: 40%;
-          min-width: 130px;
-          flex-shrink: 0;
-          background: var(--accent-light, #f8f8f8);
+          flex: 1 1 0;
+          min-width: 0;
+          background: var(--accent-light, #fdf0f4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           overflow: hidden;
+          padding: 20px;
         }
         .oc-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
+          max-width: 100%;
+          max-height: 360px;
+          width: auto;
+          height: auto;
+          object-fit: contain;
           display: block;
-          transition: transform 0.5s ease;
+          transition: transform 0.7s ease;
         }
         .oc-card--hovered .oc-image {
-          transform: scale(1.07);
-        }
-        .oc-image-overlay {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(to right, transparent 55%, rgba(255,255,255,0.65) 100%);
-          pointer-events: none;
+          transform: scale(1.04);
         }
 
-        /* ── Body ── */
+        /* ── Text Panel (right) ── */
         .oc-body {
-          flex: 1;
-          padding: 22px 20px;
+          flex: 0 0 380px;
+          width: 380px;
+          padding: 40px 44px;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          gap: 8px;
-          min-width: 0;
+          gap: 12px;
+          background: #fff;
+          border-left: 1px solid rgba(0,0,0,0.05);
+          position: relative;
+          z-index: 1;
         }
 
         .oc-brand-pill {
           display: inline-flex;
           align-items: center;
-          gap: 4px;
+          gap: 6px;
           color: var(--accent);
-          font-size: 9.5px;
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
 
         .oc-name {
-          font-size: clamp(14px, 2vw, 18px);
+          font-size: clamp(20px, 3vw, 28px);
           font-weight: 800;
           color: #1a1a2e;
           letter-spacing: -0.015em;
@@ -347,7 +351,7 @@ const OfferSection = () => {
         }
 
         .oc-desc {
-          font-size: 11.5px;
+          font-size: 14px;
           color: #888;
           line-height: 1.6;
           margin: 0;
@@ -360,12 +364,12 @@ const OfferSection = () => {
         .oc-pricing {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 14px;
           flex-wrap: wrap;
-          margin-top: 2px;
+          margin-top: 6px;
         }
         .oc-price {
-          font-size: clamp(22px, 3vw, 30px);
+          font-size: clamp(28px, 4vw, 38px);
           font-weight: 900;
           color: #1a1a2e;
           letter-spacing: -0.03em;
@@ -396,18 +400,18 @@ const OfferSection = () => {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 8px;
           background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
           color: #fff;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 700;
           letter-spacing: 0.1em;
           text-transform: uppercase;
-          padding: 11px 20px;
+          padding: 14px 28px;
           border-radius: 50px;
           border: none;
           cursor: pointer;
-          margin-top: 4px;
+          margin-top: 10px;
           align-self: flex-start;
           transition: all 0.28s ease;
           box-shadow: 0 5px 16px var(--accent-shadow, rgba(0,0,0,) 0.3);
@@ -431,30 +435,45 @@ const OfferSection = () => {
           filter: brightness(0.95);
         }
 
-        /* ── Responsive ── */
         @media (max-width: 900px) {
-          .os-grid {
-            grid-template-columns: 1fr;
-            max-width: 560px;
+          .oc-body {
+            flex: 0 0 300px;
+            width: 300px;
+            padding: 30px 28px;
+          }
+          .oc-image {
+            max-height: 280px;
           }
         }
-        @media (max-width: 560px) {
+        @media (max-width: 640px) {
           .os-wrapper {
             padding: 44px 12px 56px;
           }
           .oc-card {
             flex-direction: column;
+            min-height: unset;
           }
           .oc-image-wrap {
             width: 100%;
-            min-width: unset;
-            height: 200px;
+            height: 280px;
+            min-height: 280px;
+            flex: 0 0 280px;
+            padding: 20px;
+            background: var(--accent-light, #fdf0f4);
           }
-          .oc-image-overlay {
-            background: linear-gradient(to bottom, transparent 55%, rgba(255,255,255,0.65) 100%);
+          .oc-image {
+            max-width: 100%;
+            max-height: 240px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
           }
           .oc-body {
-            padding: 18px 16px;
+            flex: unset;
+            width: 100%;
+            border-left: none;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 24px 20px 32px;
           }
           .oc-btn {
             align-self: stretch;

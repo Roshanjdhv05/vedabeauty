@@ -17,7 +17,7 @@ const OptimizedImage = ({
   className = '', 
   containerClassName = '',
   loading = 'lazy',
-  fallbackSrc = 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=300',
+  fallbackSrc = '/favicon.jpeg',
   aspectRatio = 'aspect-square',
   objectFit = 'contain',
   onClick

@@ -6,10 +6,9 @@ import { getOfferProducts } from '../services/productService';
 import ProductCard from '../components/ui/ProductCard';
 import SEO from '../components/SEO';
 
-// The 4 combo offer product IDs we insert via SQL
+// The 3 combo offer product IDs we insert via SQL
 const OFFER_IDS = [
   'e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d', // Insight Combo
-  'a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e', // SugarPop Combo
   'b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f', // Mars Combo
   'c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f', // Pilgrim Combo
 ];
@@ -17,7 +16,6 @@ const OFFER_IDS = [
 const BRAND_FILTERS = [
   { label: 'All Brands', value: null },
   { label: 'Insight', value: 'Insight' },
-  { label: 'Sugar Pop', value: 'Sugar Pop' },
   { label: 'Offer', value: 'Offer' },
   { label: 'Pilgrim', value: 'Pilgrim' },
 ];
@@ -80,7 +78,7 @@ const OffersPage = () => {
     <div className="min-h-screen" style={{ background: 'linear-gradient(160deg, #fff5f8 0%, #fce8f0 40%, #f5f0ff 100%)' }}>
       <SEO
         title="Special Offers & Combo Deals | Veda Beauty"
-        description="Shop exclusive combo offers and discounted beauty products at Veda Beauty. Get the best deals on Insight, SugarPop, Mars, and Pilgrim brands."
+        description="Shop exclusive combo offers and discounted beauty products at Veda Beauty. Get the best deals on Insight, Mars, and Pilgrim brands."
         keywords="beauty combo offers, discounted cosmetics, makeup deals, Veda Beauty offers"
       />
 
@@ -118,7 +116,7 @@ const OffersPage = () => {
                 <div className="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-1">Products</div>
               </div>
               <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/10">
-                <div className="text-3xl font-black" style={{ color:'#f472b6' }}>4</div>
+                <div className="text-3xl font-black" style={{ color:'#f472b6' }}>3</div>
                 <div className="text-white/50 text-[10px] font-bold uppercase tracking-widest mt-1">Brands</div>
               </div>
             </div>
@@ -128,10 +126,9 @@ const OffersPage = () => {
 
       {/* ── Combo Offer Highlights Strip ── */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { id: 'e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d', img: '/insight_combo_offer.png', brand: 'Insight', name: 'Insight Combo', mrp: 1163, price: 814 },
-            { id: 'a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6e', img: '/sugarpop_combo_offer.png', brand: 'Sugar Pop', name: '5 Min College Ready Kit', mrp: 1076, price: 860 },
+            { id: 'e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d', img: '/insight_combo_offer.png', brand: 'Insight', name: 'Insight Combo', mrp: 1163, price: 885 },
             { id: 'b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7f', img: '/mars_combo_offer.png', brand: 'Mars', name: '5 Min Daily Makeup Kit', mrp: 999, price: 749 },
             { id: 'c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f', img: '/pilgrim_combo_offer.png', brand: 'Pilgrim', name: 'Morning Glow & Protect', mrp: 1565, price: 1179 },
           ].map((combo, i) => {

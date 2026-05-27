@@ -20,17 +20,34 @@ export const getProducts = async (limit = null) => {
 };
 
 export const getProductById = async (id) => {
+  if (!id) return null;
+
+  // Try full query with joins first
   const { data, error } = await supabase
     .from('products')
-    .select('*, brands(*), product_variants(*)')
+    .select('*, brands(*), product_variants!product_variants_product_id_fkey(*)')
     .eq('id', id)
-    .single();
+    .maybeSingle();
+
+  if (!error && data) return data;
 
   if (error) {
-    console.error(`Error fetching product ${id}:`, error);
-    return null;
+    console.warn(`Full query failed for product ${id}:`, error.message);
+    // Fallback: try without product_variants join (in case of RLS issue on that table)
+    const { data: fallback, error: fallbackError } = await supabase
+      .from('products')
+      .select('*, brands(*)')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fallbackError) {
+      console.error(`Fallback query also failed for product ${id}:`, fallbackError.message);
+      return null;
+    }
+    return fallback || null;
   }
-  return data;
+
+  return null;
 };
 
 export const getBrands = async () => {

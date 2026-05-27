@@ -12,7 +12,8 @@ import {
   getSimilarProducts,
   getRecommendedProducts
 } from '../services/productService';
-import { getMarsImages } from '../lib/marsImages';
+import { getProductImageCandidates, getShadeCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
+import SmartProductImage from '../components/ui/SmartProductImage';
 import OptimizedImage from '../components/ui/OptimizedImage';
 import ProductCard from '../components/ui/ProductCard';
 import { useCart } from '../context/CartContext';
@@ -95,9 +96,10 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab]       = useState('description');
   const [activeSlide, setActiveSlide]   = useState(0);
   const [selectedVariants, setSelectedVariants] = useState({});
-  const [showReturnPolicy, setShowReturnPolicy] = useState(false);
-  const [errorMessage, setErrorMessage]         = useState('');
-  const swiperRef                       = useRef(null);
+  const [showReturnPolicy, setShowReturnPolicy]       = useState(false);
+  const [errorMessage, setErrorMessage]               = useState('');
+  const [selectedShadeCandidates, setSelectedShadeCandidates] = useState([]);
+  const swiperRef                                     = useRef(null);
 
   /* ── fetch main product ── */
   useEffect(() => {
@@ -106,6 +108,8 @@ const ProductDetails = () => {
       setSimLoading(true);
       setRecLoading(true);
       setActiveSlide(0);
+      setSelectedVariants({});
+      setSelectedShadeCandidates([]);
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       const data = await getProductById(id);
@@ -238,33 +242,28 @@ const ProductDetails = () => {
   });
 
   // ── Resolve gallery images ──────────────────────────────────────────────
-  // For MARS products: use local /mars/ images mapped by name
-  // For other brands:  use the Supabase image_url + a single generic fallback
+  // Automatically maps images from public folder by brand + product name.
+  // MARS → /mars/*.webp  |  Sugar Pop → /sugar pop/*.png  |  etc.
   const isMars = brandName.toUpperCase().includes('MARS');
-  const marsLocalImages = isMars ? getMarsImages(product.name) : [];
+  const allProductCandidates = getProductImageCandidates(product);
 
-  let productImages = [];
-  
-  // Prioritise local images for Mars
-  if (isMars && marsLocalImages.length > 0) {
-    productImages = [...marsLocalImages];
-    // Add the DB image_url only if it's not already in the local set and is NOT an Unsplash placeholder
-    if (product.image_url && 
-        !marsLocalImages.includes(product.image_url) && 
-        !product.image_url.includes('unsplash.com')) {
-      productImages.push(product.image_url);
-    }
-  } else if (product.image_url) {
-    productImages.push(product.image_url);
-    // Add any additional gallery images stored in the DB
-    if (Array.isArray(product.gallery_images) && product.gallery_images.length > 0) {
-      productImages.push(...product.gallery_images);
-    }
+  // For MARS, each candidate is a DIFFERENT angle → separate slide
+  // For all other brands, all candidates are extensions of the SAME image → 1 slide
+  let gallerySlides = isMars
+    ? allProductCandidates.map(img => ({ candidates: [img] }))
+    : [{ candidates: allProductCandidates }];
+
+  if (gallerySlides.length === 0) {
+    gallerySlides = [{ candidates: [FALLBACK_IMAGE] }];
   }
 
-  if (productImages.length === 0) {
-    productImages = ['https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=800'];
-  }
+  // Prepend selected shade image as the first slide when a shade is active
+  const displaySlides = selectedShadeCandidates.length > 0
+    ? [{ candidates: selectedShadeCandidates, isShade: true }, ...gallerySlides]
+    : gallerySlides;
+
+  // Keep a flat productImages array for any legacy references (SEO schema, etc.)
+  const productImages = allProductCandidates;
 
   const tabs = [
     { id: 'description', label: 'Description' },
@@ -364,17 +363,20 @@ const ProductDetails = () => {
             <div className="relative">
               <Swiper
                 modules={[Pagination, Navigation]}
-                pagination={productImages.length > 1 ? { clickable: true } : false}
-                navigation={productImages.length > 1}
+                pagination={displaySlides.length > 1 ? { clickable: true } : false}
+                navigation={displaySlides.length > 1}
                 onSwiper={(swiper) => { swiperRef.current = swiper; }}
                 onSlideChange={(swiper) => setActiveSlide(swiper.activeIndex)}
                 className="aspect-square w-full md:rounded-3xl overflow-hidden shadow-md"
               >
-                {productImages.map((img, i) => (
-                  <SwiperSlide key={i}>
-                    <OptimizedImage
-                      src={img}
-                      alt={`${product.name} view ${i + 1}`}
+                {displaySlides.map((slide, i) => (
+                  <SwiperSlide key={`slide-${i}-${slide.candidates[0]}`}>
+                    <SmartProductImage
+                      candidates={slide.candidates}
+                      fallbackSrc={FALLBACK_IMAGE}
+                      alt={slide.isShade ? `${product.name} shade` : `${product.name} view ${i + 1}`}
+                      objectFit="contain"
+                      loading={i === 0 ? 'eager' : 'lazy'}
                     />
                   </SwiperSlide>
                 ))}
@@ -396,11 +398,11 @@ const ProductDetails = () => {
             </div>
 
             {/* Thumbnail strip — visible whenever there are multiple images */}
-            {productImages.length > 1 && (
+            {displaySlides.length > 1 && (
               <div className="flex gap-2 mt-3 px-1 overflow-x-auto no-scrollbar pb-1">
-                {productImages.map((img, i) => (
+                {displaySlides.map((slide, i) => (
                   <button
-                    key={i}
+                    key={`thumb-${i}`}
                     onClick={() => {
                       setActiveSlide(i);
                       swiperRef.current?.slideTo(i);
@@ -411,9 +413,11 @@ const ProductDetails = () => {
                         : 'border-transparent opacity-60 hover:opacity-100 hover:border-gray-300'
                     }`}
                   >
-                    <OptimizedImage
-                      src={img}
-                      alt={`thumb ${i + 1}`}
+                    <SmartProductImage
+                      candidates={slide.candidates}
+                      fallbackSrc={FALLBACK_IMAGE}
+                      alt={slide.isShade ? 'Shade' : `thumb ${i + 1}`}
+                      objectFit="contain"
                     />
                   </button>
                 ))}
@@ -491,32 +495,46 @@ const ProductDetails = () => {
                         const isSelected = selectedVariants[groupName]?.id === v.id;
                         
                         if (v.type === 'shade') {
+                          // Auto-resolve shade image from public folder
+                          const shadeCands = getShadeCandidates(product, v);
+                          const shadeHasImage = shadeCands.length > 0 && shadeCands[0] !== FALLBACK_IMAGE;
                           return (
                             <div key={v.id} className="flex flex-col items-center gap-2">
                               <button
                                 onClick={() => {
                                   setSelectedVariants(prev => ({...prev, [groupName]: v}));
                                   setErrorMessage('');
+                                  // Update main product image to show selected shade
+                                  setSelectedShadeCandidates(shadeCands);
+                                  setActiveSlide(0);
+                                  swiperRef.current?.slideTo(0);
                                 }}
                                 className={`group relative flex-shrink-0 w-14 h-14 rounded-full p-0.5 transition-all duration-500 ${
                                   isSelected ? 'ring-2 ring-pink-500 ring-offset-2 scale-105' : 'hover:scale-110 grayscale-[0.2] hover:grayscale-0'
                                 }`}
                               >
                                 <div className="w-full h-full rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex items-center justify-center">
-                                  {v.image_url ? (
-                                    <img 
-                                      src={v.image_url} 
-                                      alt={v.name} 
+                                  {/* Auto-map shade image; falls back to color swatch */}
+                                  {shadeHasImage ? (
+                                    <img
+                                      src={shadeCands[0]}
+                                      alt={v.name}
                                       className="w-full h-full object-cover block"
                                       loading="eager"
                                       onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                        // Try next candidate, then reveal color swatch
+                                        const nextIdx = shadeCands.indexOf(e.target.src) + 1;
+                                        if (nextIdx < shadeCands.length) {
+                                          e.target.src = shadeCands[nextIdx];
+                                        } else {
+                                          e.target.style.display = 'none';
+                                          if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                                        }
                                       }}
                                     />
                                   ) : null}
-                                  <div 
-                                    className={`${v.image_url ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
+                                  <div
+                                    className={`${shadeHasImage ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-[10px] font-bold text-gray-400`}
                                     style={{ backgroundColor: v.color_code || '#f3f4f6' }}
                                   >
                                     {!v.color_code && v.name ? v.name.substring(0, 1).toUpperCase() : ''}

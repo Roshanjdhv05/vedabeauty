@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { Link } from 'react-router-dom';
-import { getMarsImages } from '../../lib/marsImages';
-import OptimizedImage from './OptimizedImage';
+import { getProductImageCandidates, FALLBACK_IMAGE } from '../../lib/imageResolver';
+import SmartProductImage from './SmartProductImage';
 
 const ProductCard = React.memo(({ product, priority = false }) => {
   const { addToCart } = useCart();
@@ -29,18 +29,10 @@ const ProductCard = React.memo(({ product, priority = false }) => {
     toggleWishlist(product);
   };
 
-  const brandNameRaw = product.brands?.name || product.brand || '';
-  const brandName = brandNameRaw.trim();
-  const isMars = brandName.toUpperCase().includes('MARS');
-  
-  // Resolve local Mars image if it exists
-  let marsImage = null;
-  if (isMars) {
-    const images = getMarsImages(product.name);
-    if (images.length > 0) marsImage = images[0];
-  }
+  const brandName = (product.brands?.name || product.brand || '').trim();
 
-  const thumbnail = marsImage || product.image_url || 'https://images.unsplash.com/photo-1596462502278-27bfdc4033c8?auto=format&fit=crop&q=80&w=300';
+  // Auto-resolve image candidates — no manual URL needed
+  const imageCandidates = getProductImageCandidates(product);
 
   return (
     <motion.div 
@@ -50,15 +42,17 @@ const ProductCard = React.memo(({ product, priority = false }) => {
       {/* Image Container */}
       <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-white mb-3">
         <Link to={`/product/${product.id}`} className="block w-full h-full">
-          <OptimizedImage 
-            src={thumbnail} 
+          <SmartProductImage
+            candidates={imageCandidates}
+            fallbackSrc={FALLBACK_IMAGE}
             alt={product.name}
             loading={priority ? 'eager' : 'lazy'}
             className="group-hover:scale-110 transition-transform duration-700"
+            objectFit="contain"
           />
         </Link>
         
-        {/* Wishlist Button - Always Visible */}
+        {/* Wishlist Button */}
         <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
           <button 
             onClick={handleToggleWishlist}

@@ -13,6 +13,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserOrders } from '../services/orderService';
+import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
+import SmartProductImage from '../components/ui/SmartProductImage';
 
 const OrderCard = ({ order, onDetails, onInvoice }) => {
   const items = Array.isArray(order.items) ? order.items : [];
@@ -48,7 +50,12 @@ const OrderCard = ({ order, onDetails, onInvoice }) => {
         {items.map((item, i) => (
           <div key={i} className="flex gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100/50">
             <div className="w-12 h-12 rounded-lg bg-white overflow-hidden border border-gray-100 flex-shrink-0">
-              <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+              <SmartProductImage
+                candidates={getCartItemImageCandidates(item)}
+                fallbackSrc={FALLBACK_IMAGE}
+                alt={item.name}
+                objectFit="cover"
+              />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-start gap-2">

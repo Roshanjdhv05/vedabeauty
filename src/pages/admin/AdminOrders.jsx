@@ -17,6 +17,8 @@ import {
   XCircle
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../../lib/imageResolver';
+import SmartProductImage from '../../components/ui/SmartProductImage';
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -76,7 +78,12 @@ const OrderDetailsModal = ({ order, onClose, onUpdateStatus }) => {
                   {Array.isArray(order.items) ? order.items.map((item, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl border border-gray-100/50">
                       <div className="w-16 h-16 rounded-xl overflow-hidden bg-white border border-black/5 flex-shrink-0">
-                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                        <SmartProductImage
+                          candidates={getCartItemImageCandidates(item)}
+                          fallbackSrc={FALLBACK_IMAGE}
+                          alt={item.name}
+                          objectFit="cover"
+                        />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-bold text-gray-900 line-clamp-1">{item.name}</p>

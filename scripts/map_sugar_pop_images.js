@@ -1,7 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+// Manual .env parser for scripts
+const envPath = path.resolve(process.cwd(), '.env');
+const envLines = fs.readFileSync(envPath, 'utf8').split('\n');
+const env = envLines.reduce((acc, line) => {
+  const [key, ...valueParts] = line.split('=');
+  const value = valueParts.join('=');
+  if (key && value) acc[key.trim()] = value.trim();
+  return acc;
+}, {});
+
+const supabaseUrl = env.VITE_SUPABASE_URL;
+const supabaseKey = env.VITE_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Manual mapping: product name in DB => image filename in public/sugar pop/
