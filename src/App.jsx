@@ -33,6 +33,9 @@ import AdminOverview from './pages/admin/AdminOverview';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminCategoryImages from './pages/admin/AdminCategoryImages';
+import AdminPromoCodes from './pages/admin/AdminPromoCodes';
+import AdminLimitedOffers from './pages/admin/AdminLimitedOffers';
+import LimitedOfferPage from './pages/LimitedOfferPage';
 
 const AppContent = () => {
   const location = useLocation();
@@ -61,6 +64,8 @@ const AppContent = () => {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/orders" element={<AdminOrders />} />
           <Route path="/admin/category-images" element={<AdminCategoryImages />} />
+          <Route path="/admin/promo-codes" element={<AdminPromoCodes />} />
+          <Route path="/admin/limited-offers" element={<AdminLimitedOffers />} />
         </Routes>
       </AdminLayout>
     );
@@ -99,6 +104,7 @@ const AppContent = () => {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/brands" element={<BrandsPage />} />
         <Route path="/offers" element={<OffersPage />} />
+        <Route path="/limited-offers/:id" element={<LimitedOfferPage />} />
       </Routes>
     </MainLayout>
   );

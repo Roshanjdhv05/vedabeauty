@@ -10,6 +10,8 @@ import { getProducts } from '../services/productService';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LayoutGrid } from 'lucide-react';
 import SEO from '../components/SEO';
+import LimitedOfferPopUp from '../components/home/LimitedOfferPopUp';
+import LimitedOfferSection from '../components/home/LimitedOfferSection';
 
 const Home = () => {
   const organizationSchema = {
@@ -132,13 +134,17 @@ const Home = () => {
         keywords="cosmetics online, beauty products India, makeup store Thane, skincare products, lipstick, foundation, Veda Beauty, buy cosmetics online India, cosmetics shop in Thane, beauty store in Thane West, makeup products Thane, skincare shop near me, online makeup store India, best beauty store India, affordable makeup India"
         schemaData={[organizationSchema, localBusinessSchema]}
       />
+      <LimitedOfferPopUp />
       {/* 1. HERO SECTION */}
       <HeroSection />
 
       {/* 2. SHOP BY CATEGORY */}
       <ShopByCategory />
 
-      {/* 3. SHOP BY BRAND */}
+      {/* 3. LIMITED OFFER SECTION */}
+      <LimitedOfferSection />
+
+      {/* 4. SHOP BY BRAND */}
       <ShopByBrand />
 
       {/* 4. OFFER SECTION */}

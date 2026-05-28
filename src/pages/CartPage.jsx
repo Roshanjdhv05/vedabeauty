@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, MapPin, Building, Home, CheckCircle2, ChevronLeft, Loader2 } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, MapPin, Building, Home, CheckCircle2, ChevronLeft, Loader2, Tag, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createOrder } from '../services/orderService';
 import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
 import SmartProductImage from '../components/ui/SmartProductImage';
+import { supabase } from '../lib/supabase';
 
 const CartPage = () => {
   const { cart, removeFromCart, cartTotal, addToCart, clearCart } = useCart();
@@ -26,6 +27,56 @@ const CartPage = () => {
     state: ''
   });
 
+  const [promoInput, setPromoInput] = useState('');
+  const [applyingPromo, setApplyingPromo] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState('');
+
+  const discountAmount = appliedPromo ? Math.round(cartTotal * (appliedPromo.discount_percentage / 100)) : 0;
+
+  const handleApplyPromo = async () => {
+    if (!promoInput.trim()) return;
+    if (!user) {
+      setPromoError('Please login to apply promo codes');
+      return;
+    }
+
+    setApplyingPromo(true);
+    setPromoError('');
+
+    try {
+      const { data: promo, error } = await supabase
+        .from('promo_codes')
+        .select('*')
+        .eq('code', promoInput.toUpperCase().trim())
+        .single();
+
+      if (error || !promo) throw new Error('Invalid promo code');
+      if (new Date(promo.expiry_date) < new Date()) throw new Error('This promo code has expired');
+
+      const { data: usage } = await supabase
+        .from('promo_code_usages')
+        .select('id')
+        .eq('promo_code_id', promo.id)
+        .eq('user_email', user.email)
+        .single();
+
+      if (usage) throw new Error('You have already used this promo code');
+
+      setAppliedPromo(promo);
+      setPromoInput('');
+    } catch (err) {
+      setPromoError(err.message);
+    } finally {
+      setApplyingPromo(false);
+    }
+  };
+
+  const removePromo = () => {
+    setAppliedPromo(null);
+    setPromoError('');
+  };
+
   const handleCheckout = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -36,7 +87,7 @@ const CartPage = () => {
     setIsSubmitting(true);
     
     const shippingFee = cartTotal < 500 ? 60 : 0;
-    const totalAmount = cartTotal + shippingFee;
+    const totalAmount = cartTotal - discountAmount + shippingFee;
     const itemsCount = cart.reduce((total, item) => total + item.quantity, 0);
     
     const orderData = {
@@ -52,7 +103,9 @@ const CartPage = () => {
       city: address.city,
       state: address.state,
       items: cart,
-      shipping_fee: cartTotal < 500 ? 60 : 0
+      shipping_fee: cartTotal < 500 ? 60 : 0,
+      promo_code_id: appliedPromo ? appliedPromo.id : null,
+      discount_amount: discountAmount || 0
     };
 
     const { error } = await createOrder(orderData);
@@ -62,6 +115,13 @@ const CartPage = () => {
       alert(`Failed to place order: ${error.message || 'Check your connection'}`);
       setIsSubmitting(false);
       return;
+    }
+
+    if (appliedPromo) {
+      await supabase.from('promo_code_usages').insert([{
+        promo_code_id: appliedPromo.id,
+        user_email: user.email
+      }]);
     }
 
     setOrderSuccess(true);
@@ -270,6 +330,16 @@ const CartPage = () => {
                 <span className="text-gray-500 font-medium">Subtotal</span>
                 <span className="text-black font-bold">₹{cartTotal}</span>
               </div>
+              
+              {appliedPromo && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-green-600 font-bold flex items-center gap-1">
+                    <Tag size={14} /> {appliedPromo.code} ({appliedPromo.discount_percentage}%)
+                  </span>
+                  <span className="text-green-600 font-bold">-₹{discountAmount}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500 font-medium">Shipping Fee</span>
                 {cartTotal < 500 ? (
@@ -278,6 +348,43 @@ const CartPage = () => {
                   <span className="text-green-600 font-bold uppercase tracking-widest text-[10px]">Free</span>
                 )}
               </div>
+              
+              {!appliedPromo && !isCheckingOut && (
+                <div className="pt-2">
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={promoInput}
+                      onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                      placeholder="Enter Promo Code"
+                      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-black transition-colors font-bold uppercase"
+                    />
+                    <button 
+                      onClick={handleApplyPromo}
+                      disabled={applyingPromo || !promoInput.trim()}
+                      className="px-4 py-2 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-accent hover:text-black transition-colors flex items-center justify-center min-w-[80px]"
+                    >
+                      {applyingPromo ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
+                    </button>
+                  </div>
+                  {promoError && <p className="text-xs text-red-500 mt-2 font-medium">{promoError}</p>}
+                </div>
+              )}
+              
+              {appliedPromo && !isCheckingOut && (
+                <div className="pt-2">
+                  <div className="flex items-center justify-between bg-green-50 border border-green-100 rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-2 text-green-700">
+                      <CheckCircle2 size={16} />
+                      <span className="text-xs font-bold uppercase tracking-widest">Promo Applied!</span>
+                    </div>
+                    <button onClick={removePromo} className="text-green-700 hover:text-red-500 p-1 transition-colors">
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="pt-4 mt-4 border-t border-gray-200">
                 <div className="flex justify-center mb-2">
                   <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Tax are included in this order</span>
@@ -285,7 +392,7 @@ const CartPage = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold">Grand Total</span>
                   <span className="text-2xl font-bold text-black">
-                    ₹{(cartTotal + (cartTotal < 500 ? 60 : 0)).toFixed(0)}
+                    ₹{(cartTotal - discountAmount + (cartTotal < 500 ? 60 : 0)).toFixed(0)}
                   </span>
                 </div>
               </div>

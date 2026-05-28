@@ -245,6 +245,7 @@ const ProductDetails = () => {
   // Automatically maps images from public folder by brand + product name.
   // MARS → /mars/*.webp  |  Sugar Pop → /sugar pop/*.png  |  etc.
   const isMars = brandName.toUpperCase().includes('MARS');
+  const isSugarPop = brandName.toUpperCase().includes('SUGAR POP');
   const allProductCandidates = getProductImageCandidates(product);
 
   // For MARS, each candidate is a DIFFERENT angle → separate slide
@@ -371,13 +372,15 @@ const ProductDetails = () => {
               >
                 {displaySlides.map((slide, i) => (
                   <SwiperSlide key={`slide-${i}-${slide.candidates[0]}`}>
-                    <SmartProductImage
-                      candidates={slide.candidates}
-                      fallbackSrc={FALLBACK_IMAGE}
-                      alt={slide.isShade ? `${product.name} shade` : `${product.name} view ${i + 1}`}
-                      objectFit="contain"
-                      loading={i === 0 ? 'eager' : 'lazy'}
-                    />
+                    <div className={`w-full h-full ${isSugarPop ? 'p-10 flex items-center justify-center' : ''}`}>
+                      <SmartProductImage
+                        candidates={slide.candidates}
+                        fallbackSrc={FALLBACK_IMAGE}
+                        alt={slide.isShade ? `${product.name} shade` : `${product.name} view ${i + 1}`}
+                        objectFit="contain"
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                      />
+                    </div>
                   </SwiperSlide>
                 ))}
               </Swiper>
@@ -498,6 +501,7 @@ const ProductDetails = () => {
                           // Auto-resolve shade image from public folder
                           const shadeCands = getShadeCandidates(product, v);
                           const shadeHasImage = shadeCands.length > 0 && shadeCands[0] !== FALLBACK_IMAGE;
+                          
                           return (
                             <div key={v.id} className="flex flex-col items-center gap-2">
                               <button

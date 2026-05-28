@@ -35,7 +35,9 @@ export const createOrder = async (orderData) => {
         order_id: order_id,
         purchase_order_id: purchase_order_id,
         invoice_id: invoice_id,
-        shipping_fee: orderData.shipping_fee || 0
+        shipping_fee: orderData.shipping_fee || 0,
+        promo_code_id: orderData.promo_code_id || null,
+        discount_amount: orderData.discount_amount || 0
       }])
       .select()
       .single();

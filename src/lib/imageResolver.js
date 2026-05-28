@@ -123,75 +123,61 @@ export function findBestImageCandidates(brandKey, productName) {
 export function getProductImageCandidates(product) {
   const brandName = product?.brands?.name || product?.brand || product?.brand_name || '';
   const name = (product?.name || '').trim();
+  const dbUrl = product?.image_url;
+  
+  let candidates = [];
 
-  // ── MARS ── Uses the existing detailed hand-crafted map
+  // 1. Always prioritize the database image URL if it's set (and not a placeholder)
+  if (dbUrl && !dbUrl.includes('unsplash.com')) {
+    candidates.push(dbUrl);
+  }
+
+  // 2. Add brand-specific fuzzy matching / hardcoded paths as fallbacks
   if (isBrand(brandName, 'mars')) {
     const marsImages = getMarsImages(name);
-    if (marsImages.length > 0) return marsImages;
-  }
-
-
-  // ── Pilgrim ──
-  if (isBrand(brandName, 'pilgrim')) {
+    if (marsImages.length > 0) candidates.push(...marsImages);
+  } else if (isBrand(brandName, 'pilgrim')) {
     const matched = findBestImageCandidates('pilgrims', name);
-    if (matched.length > 0) return matched;
-
+    if (matched.length > 0) candidates.push(...matched);
     const slug = toSlug(name);
-    return [
+    candidates.push(
       encodePath(`/pilgrims/${slug}.png`),
-      encodePath(`/pilgrims/${slug}.jpg`),
-    ];
-  }
-
-  // ── Insight ──
-  if (isBrand(brandName, 'insight')) {
+      encodePath(`/pilgrims/${slug}.jpg`)
+    );
+  } else if (isBrand(brandName, 'insight')) {
     const matched = findBestImageCandidates('insight', name);
-    if (matched.length > 0) return matched;
-    return [encodePath(`/insight/${name}.png`)];
-  }
-
-  // ── Faces Canada ──
-  if (isBrand(brandName, 'faces canada') || isBrand(brandName, 'faces')) {
+    if (matched.length > 0) candidates.push(...matched);
+    candidates.push(encodePath(`/insight/${name}.png`));
+  } else if (isBrand(brandName, 'faces canada') || isBrand(brandName, 'faces')) {
     const matched = findBestImageCandidates('facesCanada', name);
-    if (matched.length > 0) return matched;
-
+    if (matched.length > 0) candidates.push(...matched);
     const upper = toUpper(name);
-    return [
+    candidates.push(
       encodePath(`/faces canada/${upper}.jpg`),
-      encodePath(`/faces canada/${upper}.png`),
-    ];
-  }
-
-  // ── Lotus ──
-  if (isBrand(brandName, 'lotus')) {
+      encodePath(`/faces canada/${upper}.png`)
+    );
+  } else if (isBrand(brandName, 'lotus')) {
     const matched = findBestImageCandidates('lotus', name);
-    if (matched.length > 0) return matched;
-
+    if (matched.length > 0) candidates.push(...matched);
     const upper = toUpper(name);
-    return [
+    candidates.push(
       encodePath(`/lotus/${upper}.jpg`),
-      encodePath(`/lotus/${upper}.png`),
-    ];
-  }
-
-  // ── Sugar Pop ──
-  if (isBrand(brandName, 'sugar pop')) {
+      encodePath(`/lotus/${upper}.png`)
+    );
+  } else if (isBrand(brandName, 'sugar pop')) {
     const matched = findBestImageCandidates('sugarPop', name);
-    if (matched.length > 0) return matched;
-
+    if (matched.length > 0) candidates.push(...matched);
     const upper = toUpper(name);
-    return [
+    candidates.push(
       encodePath(`/sugar pop/${upper}.png`),
       encodePath(`/sugar pop/${upper}.jpg`),
       encodePath(`/sugar pop/${upper}.jfif`),
-      encodePath(`/sugar pop/${upper}.webp`),
-    ];
+      encodePath(`/sugar pop/${upper}.webp`)
+    );
   }
 
-  // ── Generic fallback: use what's stored in the DB ──
-  const dbUrl = product?.image_url;
-  if (dbUrl && !dbUrl.includes('unsplash.com')) {
-    return [dbUrl];
+  if (candidates.length > 0) {
+    return candidates;
   }
 
   return [FALLBACK_IMAGE];
@@ -217,25 +203,35 @@ export function getShadeCandidates(product, variant) {
 
   const productFolder = toUpper(productName);
   const shadeFile = toUpper(shadeName);
-
+  
+  let candidates = [];
+  
+  // 1. Always prioritize the database image URL if it's set
+  if (variant?.image_url && !variant.image_url.includes('unsplash.com')) {
+    candidates.push(variant.image_url);
+  }
 
   // ── MARS offer shades ──
   if (isBrand(brandName, 'mars')) {
-    return [
+    candidates.push(
       encodePath(`/shades/offers/mars/${productFolder}/${shadeFile}.jpg`),
-      encodePath(`/shades/offers/mars/${productFolder}/${shadeFile}.png`),
-    ];
+      encodePath(`/shades/offers/mars/${productFolder}/${shadeFile}.png`)
+    );
   }
 
   // ── Insight offer shades ──
   if (isBrand(brandName, 'insight')) {
-    return [
+    candidates.push(
       encodePath(`/shades/offers/insight/${productFolder}/${shadeFile}.jpg`),
-      encodePath(`/shades/offers/insight/${productFolder}/${shadeFile}.png`),
-    ];
+      encodePath(`/shades/offers/insight/${productFolder}/${shadeFile}.png`)
+    );
   }
 
-  // ── Generic: fall back to variant's stored URL ──
+  if (candidates.length > 0) {
+    return candidates;
+  }
+
+  // ── Generic: fall back to variant's stored URL if we haven't already ──
   if (variant?.image_url) return [variant.image_url];
 
   return [FALLBACK_IMAGE];
