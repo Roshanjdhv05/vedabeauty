@@ -106,7 +106,7 @@ const BrandHero = ({ brandData, productCount, onBack }) => {
   );
 };
 
-const CategoryScroller = ({ categories, onSelect, categoryImages }) => (
+const CategoryScroller = ({ categories, onSelect, categoryImages, getCategoryImage }) => (
   <section className="mt-6">
     <SectionHeader icon={Sparkles} title="Shop by Category" accentClass="text-[#D4AF37]" />
     <div className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-4 items-start">
@@ -120,12 +120,12 @@ const CategoryScroller = ({ categories, onSelect, categoryImages }) => (
         >
           <div className="aspect-square w-full rounded-2xl bg-white flex items-center justify-center overflow-hidden border border-[#F8C8DC]/30 shadow-sm transition-all hover:border-[#F8C8DC] hover:shadow-md">
             <img 
-              src={categoryImages[cat] ?? DEFAULT_CATEGORY_IMAGES[cat] ?? DEFAULT_CATEGORY_IMAGES.Face} 
+              src={getCategoryImage ? getCategoryImage(cat) : (categoryImages[cat] ?? CATEGORY_IMAGES[cat] ?? CATEGORY_IMAGES.Face)} 
               alt={cat}
               className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
             />
           </div>
-          <span className="text-[11px] md:text-sm font-semibold text-gray-700 text-center leading-tight">
+          <span className="text-[11px] md:text-sm font-semibold text-gray-700 text-center leading-tight uppercase">
             {cat}
           </span>
         </motion.button>
@@ -241,9 +241,18 @@ const BrandPage = () => {
   const brandData = allProducts[0]?.brands ?? null;
   const brandName = brandData?.name ?? 'Brand';
 
-  // Only show categories explicitly added by admin in database
-  const explicitCats = Object.keys(categoryImages).sort();
+  // Only show categories explicitly added by admin in database, excluding Accessories
+  const explicitCats = Object.keys(categoryImages)
+    .filter(c => c.toLowerCase() !== 'accessories')
+    .sort();
   const uniqueCats = ['All', ...explicitCats];
+
+  const getCategoryImage = (cat) => {
+    const targetCats = getMappedCategories(brandData?.name, cat);
+    const prod = allProducts.find(p => targetCats.includes(p.category?.toLowerCase() || '') && p.image_url);
+    if (prod && prod.image_url) return prod.image_url;
+    return null;
+  };
 
   // ── TRENDING NOW ──────────────────────────────────────────────
   // Products that belong to THIS brand that have ratings
@@ -335,7 +344,12 @@ const BrandPage = () => {
 
       {/* 2. SHOP BY CATEGORY (Only show if admin has configured categories) */}
       {explicitCats.length > 0 && (
-        <CategoryScroller categories={uniqueCats} onSelect={handleCategorySelect} categoryImages={categoryImages} />
+        <CategoryScroller 
+          categories={uniqueCats} 
+          onSelect={handleCategorySelect} 
+          categoryImages={categoryImages} 
+          getCategoryImage={getCategoryImage}
+        />
       )}
 
       {/* 3. TRENDING NOW */}

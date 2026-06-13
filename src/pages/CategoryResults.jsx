@@ -63,6 +63,22 @@ const CategoryResults = () => {
     !trendingProducts.find(t => t.id === p.id)
   );
 
+  // Group other products by brand for brand-specific sections
+  const brandGroups = {};
+  otherProducts.forEach(p => {
+    const bName = (p.brands?.name || p.brand || p.brand_name || 'Other').trim();
+    if (bName && bName.toLowerCase() !== 'other') {
+      if (!brandGroups[bName]) brandGroups[bName] = [];
+      brandGroups[bName].push(p);
+    }
+  });
+
+  // Select top brands that have enough products for a slider
+  const topBrands = Object.entries(brandGroups)
+    .filter(([_, prods]) => prods.length >= 3)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 5); // Show up to 5 brand sections
+
   return (
     <div className="min-h-screen bg-background pt-24 pb-20">
       <SEO 
@@ -111,7 +127,33 @@ const CategoryResults = () => {
         ) : filteredProducts.length > 0 ? (
           <div className="space-y-20">
             
-            {/* Section 1: Trending */}
+            {/* Section 1: Value for Money (Moved to top as requested) */}
+            {valueForMoneyProducts.length > 0 && (
+              <section className="bg-black -mx-4 px-4 py-16 md:rounded-[3rem] shadow-2xl">
+                <div className="max-w-7xl mx-auto">
+                  <div className="flex justify-between items-end mb-8">
+                    <div>
+                      <h2 className="text-2xl md:text-4xl font-serif font-bold text-white uppercase tracking-tight">Value for Money</h2>
+                      <p className="text-xs text-accent mt-1 uppercase tracking-widest font-bold">Budget Friendly Professional Choice</p>
+                    </div>
+                    <span className="px-4 py-1.5 bg-accent/20 text-accent text-[10px] font-bold rounded-full border border-accent/30 uppercase tracking-widest">Under ₹499</span>
+                  </div>
+                  <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                    <div className="flex gap-4 md:gap-8 pb-8 w-max px-4">
+                      {valueForMoneyProducts.map((product, index) => (
+                        <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
+                          <ProductCard product={product} priority={index < 4} />
+                        </div>
+                      ))}
+                      {/* Spacer for scroll-end */}
+                      <div className="w-12 flex-shrink-0" aria-hidden="true" />
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Section 2: Trending */}
             {trendingProducts.length > 0 && (
               <section>
                 <div className="flex justify-between items-end mb-8">
@@ -138,33 +180,29 @@ const CategoryResults = () => {
               </section>
             )}
 
-            {/* Section 2: Value for Money */}
-            {valueForMoneyProducts.length > 0 && (
-              <section className="bg-black -mx-4 px-4 py-16 md:rounded-[3rem] shadow-2xl">
-                <div className="max-w-7xl mx-auto">
-                  <div className="flex justify-between items-end mb-8">
-                    <div>
-                      <h2 className="text-2xl md:text-4xl font-serif font-bold text-white uppercase tracking-tight">Value for Money</h2>
-                      <p className="text-xs text-accent mt-1 uppercase tracking-widest font-bold">Budget Friendly Professional Choice</p>
-                    </div>
-                    <span className="px-4 py-1.5 bg-accent/20 text-accent text-[10px] font-bold rounded-full border border-accent/30 uppercase tracking-widest">Under ₹499</span>
+            {/* Section 3: Brand Specific Sections */}
+            {topBrands.map(([brandName, brandProducts]) => (
+              <section key={brandName}>
+                <div className="flex justify-between items-end mb-8">
+                  <div>
+                    <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">{brandName}</h2>
+                    <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Premium {categoryName} Collection</p>
                   </div>
-                  <div className="overflow-x-auto no-scrollbar scroll-smooth">
-                    <div className="flex gap-4 md:gap-8 pb-8 w-max px-4">
-                      {valueForMoneyProducts.map((product, index) => (
-                        <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
-                          <ProductCard product={product} priority={index < 4} />
-                        </div>
-                      ))}
-                      {/* Spacer for scroll-end */}
-                      <div className="w-12 flex-shrink-0" aria-hidden="true" />
-                    </div>
+                </div>
+                <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                  <div className="flex gap-4 md:gap-8 pb-8 w-max px-4">
+                    {brandProducts.slice(0, 10).map((product) => (
+                      <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[240px]">
+                        <ProductCard product={product} />
+                      </div>
+                    ))}
+                    <div className="w-12 flex-shrink-0" aria-hidden="true" />
                   </div>
                 </div>
               </section>
-            )}
+            ))}
 
-            {/* Section 3: All Other Products */}
+            {/* Section 4: All Other Products */}
             <section>
               <div className="flex items-center gap-4 mb-10">
                 <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">All Collections</h2>

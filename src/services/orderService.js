@@ -21,6 +21,7 @@ export const createOrder = async (orderData) => {
       .insert([{
         user_id: orderData.user_id,
         customer_name: orderData.customer_name,
+        phone: orderData.phone || null,
         total_amount: orderData.total_amount,
         status: 'pending',
         address_line1: orderData.address_line1,

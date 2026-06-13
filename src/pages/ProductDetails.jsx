@@ -243,16 +243,38 @@ const ProductDetails = () => {
 
   // ── Resolve gallery images ──────────────────────────────────────────────
   // Automatically maps images from public folder by brand + product name.
-  // MARS → /mars/*.webp  |  Sugar Pop → /sugar pop/*.png  |  etc.
   const isMars = brandName.toUpperCase().includes('MARS');
   const isSugarPop = brandName.toUpperCase().includes('SUGAR POP');
-  const allProductCandidates = getProductImageCandidates(product);
+  
+  // Base auto-resolved candidates (from public folder)
+  const autoCandidates = getProductImageCandidates(product).filter(img => 
+    img !== product.image_url && !(product.gallery_images || []).includes(img)
+  );
 
-  // For MARS, each candidate is a DIFFERENT angle → separate slide
-  // For all other brands, all candidates are extensions of the SAME image → 1 slide
-  let gallerySlides = isMars
-    ? allProductCandidates.map(img => ({ candidates: [img] }))
-    : [{ candidates: allProductCandidates }];
+  let gallerySlides = [];
+
+  // 1. Primary DB Image (if it exists and is not a placeholder)
+  if (product.image_url && !product.image_url.includes('unsplash.com')) {
+    gallerySlides.push({ candidates: [product.image_url] });
+  }
+
+  // 2. Additional DB Gallery Images
+  if (product.gallery_images && Array.isArray(product.gallery_images)) {
+    product.gallery_images.forEach(img => {
+      gallerySlides.push({ candidates: [img] });
+    });
+  }
+
+  // 3. Auto-resolved fallback images
+  if (autoCandidates.length > 0) {
+    if (isMars) {
+      // For MARS, each candidate is a DIFFERENT angle → separate slide
+      autoCandidates.forEach(img => gallerySlides.push({ candidates: [img] }));
+    } else {
+      // For others, candidates are just extensions of the SAME image → 1 slide
+      gallerySlides.push({ candidates: autoCandidates });
+    }
+  }
 
   if (gallerySlides.length === 0) {
     gallerySlides = [{ candidates: [FALLBACK_IMAGE] }];
@@ -264,7 +286,7 @@ const ProductDetails = () => {
     : gallerySlides;
 
   // Keep a flat productImages array for any legacy references (SEO schema, etc.)
-  const productImages = allProductCandidates;
+  const productImages = gallerySlides.map(s => s.candidates[0]);
 
   const tabs = [
     { id: 'description', label: 'Description' },
@@ -523,12 +545,14 @@ const ProductDetails = () => {
                                     <img
                                       src={shadeCands[0]}
                                       alt={v.name}
+                                      data-img-idx="0"
                                       className="w-full h-full object-cover block"
                                       loading="eager"
                                       onError={(e) => {
-                                        // Try next candidate, then reveal color swatch
-                                        const nextIdx = shadeCands.indexOf(e.target.src) + 1;
+                                        const currentIdx = parseInt(e.target.getAttribute('data-img-idx') || '0', 10);
+                                        const nextIdx = currentIdx + 1;
                                         if (nextIdx < shadeCands.length) {
+                                          e.target.setAttribute('data-img-idx', nextIdx);
                                           e.target.src = shadeCands[nextIdx];
                                         } else {
                                           e.target.style.display = 'none';

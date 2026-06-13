@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, MapPin, Building, Home, CheckCircle2, ChevronLeft, Loader2, Tag, X } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, MapPin, Building, Home, CheckCircle2, ChevronLeft, Loader2, Tag, X, Phone, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createOrder } from '../services/orderService';
@@ -18,6 +18,46 @@ const CartPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
   
+  const [customerName, setCustomerName] = useState('');
+  const [phoneCountry, setPhoneCountry] = useState({ code: '+91', digits: 10, label: '🇮🇳 India +91' });
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  const COUNTRY_CODES = [
+    { code: '+91',  digits: 10, label: '🇮🇳 +91' },
+    { code: '+1',   digits: 10, label: '🇺🇸 +1' },
+    { code: '+44',  digits: 10, label: '🇬🇧 +44' },
+    { code: '+971', digits: 9,  label: '🇦🇪 +971' },
+    { code: '+61',  digits: 9,  label: '🇦🇺 +61' },
+    { code: '+65',  digits: 8,  label: '🇸🇬 +65' },
+    { code: '+60',  digits: 9,  label: '🇲🇾 +60' },
+    { code: '+880', digits: 10, label: '🇧🇩 +880' },
+    { code: '+92',  digits: 10, label: '🇵🇰 +92' },
+    { code: '+94',  digits: 9,  label: '🇱🇰 +94' },
+    { code: '+977', digits: 10, label: '🇳🇵 +977' },
+    { code: '+49',  digits: 10, label: '🇩🇪 +49' },
+    { code: '+33',  digits: 9,  label: '🇫🇷 +33' },
+    { code: '+81',  digits: 10, label: '🇯🇵 +81' },
+    { code: '+86',  digits: 11, label: '🇨🇳 +86' },
+  ];
+
+  const handlePhoneChange = (val) => {
+    const cleaned = val.replace(/\D/g, '');
+    setPhoneNumber(cleaned);
+    if (cleaned.length > 0 && cleaned.length !== phoneCountry.digits) {
+      setPhoneError(`Enter a valid ${phoneCountry.digits}-digit number for ${phoneCountry.code}`);
+    } else {
+      setPhoneError('');
+    }
+  };
+
+  const handleCountryChange = (e) => {
+    const selected = COUNTRY_CODES.find(c => c.code === e.target.value);
+    setPhoneCountry(selected);
+    setPhoneNumber('');
+    setPhoneError('');
+  };
+
   const [address, setAddress] = useState({
     line1: '',
     line2: '',
@@ -83,6 +123,11 @@ const CartPage = () => {
       navigate('/login?redirect=cart');
       return;
     }
+    // Phone validation
+    if (phoneNumber.length !== phoneCountry.digits) {
+      setPhoneError(`Enter a valid ${phoneCountry.digits}-digit number for ${phoneCountry.code}`);
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -92,9 +137,10 @@ const CartPage = () => {
     
     const orderData = {
       user_id: user.id,
-      customer_name: user.email.split('@')[0], // Fallback name
+      customer_name: customerName.trim() || user.email.split('@')[0],
+      phone: `${phoneCountry.code}${phoneNumber}`,
       total_amount: totalAmount,
-      profit_amount: Math.round(totalAmount * 0.15), // Estimated 15% profit margin
+      profit_amount: Math.round(totalAmount * 0.15),
       items_count: itemsCount,
       address_line1: address.line1,
       address_line2: address.line2,
@@ -258,11 +304,85 @@ const CartPage = () => {
                 exit={{ opacity: 0, x: -20 }}
                 className="bg-white border border-gray-100 rounded-3xl p-6 md:p-8 shadow-sm"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Section: Personal Info */}
+                <div className="mb-6">
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-5">Personal Information</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Full Name */}
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">
+                        <User size={12} className="text-accent" />
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="Your full name"
+                        className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
+                      />
+                    </div>
+
+                    {/* Phone Number */}
+                    <div className="col-span-2 md:col-span-1">
+                      <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">
+                        <Phone size={12} className="text-accent" />
+                        Phone Number *
+                      </label>
+                      <div className="flex gap-2">
+                        {/* Country Code Select */}
+                        <div className="relative flex-shrink-0">
+                          <select
+                            value={phoneCountry.code}
+                            onChange={handleCountryChange}
+                            className="appearance-none h-full bg-gray-50 border border-gray-100 rounded-2xl py-4 pl-3 pr-6 text-xs font-semibold focus:outline-none focus:border-accent/50 transition-all cursor-pointer min-w-[80px]"
+                          >
+                            {COUNTRY_CODES.map(c => (
+                              <option key={c.code} value={c.code}>{c.label}</option>
+                            ))}
+                          </select>
+                          <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2">
+                            <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+                        {/* Phone Input */}
+                        <input
+                          type="tel"
+                          required
+                          value={phoneNumber}
+                          onChange={(e) => handlePhoneChange(e.target.value)}
+                          placeholder={`${phoneCountry.digits}-digit number`}
+                          maxLength={phoneCountry.digits}
+                          className={`flex-1 bg-gray-50 border rounded-2xl py-4 px-4 text-xs focus:outline-none transition-all ${
+                            phoneError ? 'border-red-300 focus:border-red-400' : 'border-gray-100 focus:border-accent/50'
+                          }`}
+                        />
+                      </div>
+                      {phoneError && (
+                        <p className="text-[11px] text-red-500 font-semibold mt-2 ml-2">{phoneError}</p>
+                      )}
+                      {!phoneError && phoneNumber.length === phoneCountry.digits && (
+                        <p className="text-[11px] text-green-500 font-semibold mt-2 ml-2 flex items-center gap-1">
+                          <CheckCircle2 size={11} /> Valid number
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-100 my-2 mb-6" />
+
+                {/* Section: Delivery Address */}
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-5">Delivery Address</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="col-span-2">
                     <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">
                       <MapPin size={12} className="text-accent" />
-                      Address Line 1*
+                      Address Line 1 *
                     </label>
                     <input 
                       type="text" required value={address.line1} onChange={(e) => setAddress({...address, line1: e.target.value})}
@@ -273,10 +393,10 @@ const CartPage = () => {
                   <div className="col-span-2">
                     <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">
                       <Building size={12} className="text-gray-400" />
-                      Address Line 2
+                      Address Line 2 *
                     </label>
                     <input 
-                      type="text" value={address.line2} onChange={(e) => setAddress({...address, line2: e.target.value})}
+                      type="text" required value={address.line2} onChange={(e) => setAddress({...address, line2: e.target.value})}
                       placeholder="Area / Sector / Apartment"
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
                     />
@@ -284,33 +404,39 @@ const CartPage = () => {
                   <div className="col-span-2 md:col-span-1">
                     <label className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 ml-2">
                       <Home size={12} className="text-gray-400" />
-                      Landmark
+                      Landmark *
                     </label>
                     <input 
-                      type="text" value={address.landmark} onChange={(e) => setAddress({...address, landmark: e.target.value})}
+                      type="text" required value={address.landmark} onChange={(e) => setAddress({...address, landmark: e.target.value})}
                       placeholder="Nearby school, hospital, etc."
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
                     />
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">Pincode*</label>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">Pincode *</label>
                     <input 
-                      type="number" required value={address.pincode} onChange={(e) => setAddress({...address, pincode: e.target.value})}
+                      type="text"
+                      required
+                      value={address.pincode}
+                      onChange={(e) => setAddress({...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6)})}
                       placeholder="6 Digit PIN"
+                      maxLength={6}
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
                     />
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">City*</label>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">City *</label>
                     <input 
                       type="text" required value={address.city} onChange={(e) => setAddress({...address, city: e.target.value})}
+                      placeholder="City name"
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
                     />
                   </div>
                   <div className="col-span-2 md:col-span-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">State*</label>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 block ml-2">State *</label>
                     <input 
                       type="text" required value={address.state} onChange={(e) => setAddress({...address, state: e.target.value})}
+                      placeholder="State name"
                       className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 text-sm focus:outline-none focus:border-accent/50 transition-all"
                     />
                   </div>
@@ -351,18 +477,18 @@ const CartPage = () => {
               
               {!appliedPromo && !isCheckingOut && (
                 <div className="pt-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
                     <input 
                       type="text" 
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                       placeholder="Enter Promo Code"
-                      className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-black transition-colors font-bold uppercase"
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors font-bold uppercase"
                     />
                     <button 
                       onClick={handleApplyPromo}
                       disabled={applyingPromo || !promoInput.trim()}
-                      className="px-4 py-2 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-accent hover:text-black transition-colors flex items-center justify-center min-w-[80px]"
+                      className="w-full py-3 bg-black text-white rounded-xl text-xs font-bold uppercase tracking-widest disabled:opacity-50 hover:bg-accent hover:text-black transition-colors flex items-center justify-center"
                     >
                       {applyingPromo ? <Loader2 size={14} className="animate-spin" /> : 'Apply'}
                     </button>
@@ -409,7 +535,18 @@ const CartPage = () => {
             ) : (
               <button 
                 onClick={handleCheckout}
-                disabled={isSubmitting || !address.line1 || !address.pincode}
+                disabled={
+                  isSubmitting ||
+                  !customerName.trim() ||
+                  phoneNumber.length !== phoneCountry.digits ||
+                  !!phoneError ||
+                  !address.line1 ||
+                  !address.line2 ||
+                  !address.landmark ||
+                  !address.pincode ||
+                  !address.city ||
+                  !address.state
+                }
                 className="w-full bg-black text-white py-5 rounded-2xl flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.2em] shadow-xl hover:bg-accent hover:text-black transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (

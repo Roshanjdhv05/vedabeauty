@@ -16,6 +16,7 @@ import {
   Pen
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { getProductImageCandidates } from '../../lib/imageResolver';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -41,6 +42,7 @@ const AdminProducts = () => {
     category: '',
     price: '',
     image_url: '',
+    gallery_images: [],
     description: '',
     has_variants: false,
     is_offer: false,
@@ -125,6 +127,7 @@ const AdminProducts = () => {
       category: product.category || '',
       price: product.price || '',
       image_url: product.image_url || product.image || '',
+      gallery_images: product.gallery_images || [],
       description: product.description || '',
       has_variants: product.has_variants || false,
       is_offer: product.is_offer || false,
@@ -213,6 +216,41 @@ const AdminProducts = () => {
     } catch (error) {
       console.error('Upload Error:', error);
       alert(`Error uploading image: ${error.message}. Please ensure you have a public storage bucket named 'product-images' in Supabase.`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleGalleryImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+
+    setIsUploading(true);
+    try {
+      const newUrls = [];
+      for (const file of files) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `gallery_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+        if (data?.publicUrl) {
+          newUrls.push(data.publicUrl);
+        }
+      }
+      
+      setProductForm({ 
+        ...productForm, 
+        gallery_images: [...(productForm.gallery_images || []), ...newUrls] 
+      });
+    } catch (error) {
+      console.error('Gallery Upload Error:', error);
+      alert(`Error uploading gallery images: ${error.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -728,8 +766,38 @@ const AdminProducts = () => {
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-4">Product Image</label>
                     <div className="flex items-center gap-4">
                       {productForm.image_url && (
-                        <div className="w-16 h-16 rounded-xl border border-gray-100 overflow-hidden flex-shrink-0 bg-gray-50">
+                        <div className="relative w-16 h-16 rounded-xl border border-gray-100 overflow-hidden flex-shrink-0 bg-gray-50 group">
                           <img src={productForm.image_url} alt="Preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              let newImageUrl = '';
+                              let newGallery = [...(productForm.gallery_images || [])];
+                              
+                              if (newGallery.length > 0) {
+                                newImageUrl = newGallery[0];
+                                newGallery.splice(0, 1);
+                              } else if (editingProduct) {
+                                const autoCandidates = getProductImageCandidates(editingProduct).filter(img => 
+                                  img !== productForm.image_url && 
+                                  img !== '/favicon.jpeg' &&
+                                  !(productForm.gallery_images || []).includes(img)
+                                );
+                                if (autoCandidates.length > 0) {
+                                  newImageUrl = autoCandidates[0];
+                                }
+                              }
+
+                              setProductForm({ 
+                                ...productForm, 
+                                image_url: newImageUrl,
+                                gallery_images: newGallery
+                              });
+                            }}
+                            className="absolute top-1 right-1 bg-white/90 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       )}
                       <div className="flex-1">
@@ -752,6 +820,98 @@ const AdminProducts = () => {
                       className="w-full mt-2 bg-gray-50 border border-gray-100 rounded-2xl py-3 px-6 text-sm focus:outline-none focus:border-accent/50"
                     />
                   </div>
+
+                  {/* Gallery Images */}
+                  <div className="col-span-2 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+                    <label className="block text-[10px] font-bold text-gray-900 uppercase tracking-widest mb-4">Gallery Images (Optional)</label>
+                    
+                    {productForm.gallery_images && productForm.gallery_images.length > 0 && (
+                      <div className="flex flex-wrap gap-4 mb-4">
+                        {productForm.gallery_images.map((url, idx) => (
+                          <div key={idx} className="relative w-20 h-20 rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm group">
+                            <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newGallery = [...productForm.gallery_images];
+                                newGallery.splice(idx, 1);
+                                setProductForm({ ...productForm, gallery_images: newGallery });
+                              }}
+                              className="absolute top-1 right-1 bg-white/90 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                      <div className="flex items-center gap-4">
+                      <div className="flex-1">
+                        <input 
+                          type="file" 
+                          multiple
+                          accept="image/*"
+                          onChange={handleGalleryImageUpload}
+                          disabled={isUploading}
+                          className="w-full text-sm text-gray-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-widest file:bg-white file:border file:border-gray-200 file:text-gray-700 hover:file:bg-gray-50 transition-all cursor-pointer"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Auto-resolved Images (Read-only) */}
+                  {editingProduct && (() => {
+                    const autoCandidates = getProductImageCandidates(editingProduct).filter(img => 
+                      img !== editingProduct.image_url && 
+                      img !== '/favicon.jpeg' &&
+                      !(editingProduct.gallery_images || []).includes(img)
+                    );
+                    
+                    if (autoCandidates.length === 0) return null;
+                    
+                    return (
+                      <div className="col-span-2 bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                        <label className="block text-[10px] font-bold text-blue-900 uppercase tracking-widest mb-1">Folder Images (Auto-Resolved)</label>
+                        <p className="text-[10px] text-blue-600 mb-4">These images are automatically loaded from your public folders (e.g. public/mars/) and cannot be deleted here.</p>
+                        
+                        <div className="flex flex-wrap gap-4">
+                          {autoCandidates.map((url, idx) => (
+                            <div key={`auto-${idx}`} className="relative w-20 h-20 rounded-xl border border-blue-200 overflow-hidden bg-white shadow-sm group">
+                              <img 
+                                src={url} 
+                                alt={`Auto ${idx}`} 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => { e.target.style.display = 'none'; }}
+                              />
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  if (!window.confirm('Are you sure you want to permanently delete this file from your computer?')) return;
+                                  try {
+                                    const res = await fetch(`/api/delete-image?path=${encodeURIComponent(url)}`, { method: 'DELETE' });
+                                    if (res.ok) {
+                                      // Force a re-render by triggering a fake update
+                                      setProductForm({ ...productForm });
+                                      alert('File deleted successfully!');
+                                    } else {
+                                      alert('Could not delete file. Make sure you are running the local Vite server.');
+                                    }
+                                  } catch (err) {
+                                    alert('Error deleting file: ' + err.message);
+                                  }
+                                }}
+                                className="absolute top-1 right-1 bg-white/90 text-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50"
+                                title="Delete file permanently"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <div className="col-span-2">
                     <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-4">Description</label>
                     <textarea 

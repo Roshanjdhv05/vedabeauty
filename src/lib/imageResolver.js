@@ -8,6 +8,7 @@
 
 import { getMarsImages } from './marsImages';
 import { BRAND_IMAGE_MAP } from './brandImageMap';
+import { getMarsShadeFolder } from './marsShadeMap';
 
 /** Generic fallback shown when no image resolves */
 export const FALLBACK_IMAGE = '/favicon.jpeg';
@@ -132,6 +133,11 @@ export function getProductImageCandidates(product) {
     candidates.push(dbUrl);
   }
 
+  // 1.5 Add any gallery images saved in the database
+  if (product?.gallery_images && Array.isArray(product.gallery_images) && product.gallery_images.length > 0) {
+    candidates.push(...product.gallery_images);
+  }
+
   // 2. Add brand-specific fuzzy matching / hardcoded paths as fallbacks
   if (isBrand(brandName, 'mars')) {
     const marsImages = getMarsImages(name);
@@ -213,7 +219,18 @@ export function getShadeCandidates(product, variant) {
 
   // ── MARS offer shades ──
   if (isBrand(brandName, 'mars')) {
+    const marsFolder = getMarsShadeFolder(productName) || productFolder;
+    
     candidates.push(
+      encodePath(`/mars/shades/${marsFolder}/${shadeName}.png`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeName}.jpg`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeName}.webp`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeName}.jfif`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeFile}.png`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeFile}.jpg`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeFile}.webp`),
+      encodePath(`/mars/shades/${marsFolder}/${shadeFile}.jfif`),
+      // Legacy fallback
       encodePath(`/shades/offers/mars/${productFolder}/${shadeFile}.jpg`),
       encodePath(`/shades/offers/mars/${productFolder}/${shadeFile}.png`)
     );

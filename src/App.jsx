@@ -25,6 +25,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import OffersPage from './pages/OffersPage';
 import PWAInstallBanner from './components/layout/PWAInstallBanner';
+import IOSInstallPrompt from './components/layout/IOSInstallPrompt';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -115,6 +116,7 @@ function App() {
     <Router>
       <AppContent />
       <PWAInstallBanner />
+      <IOSInstallPrompt />
     </Router>
   );
 }

@@ -10,7 +10,7 @@ const offers = [
     desc: 'A curated professional combo — everything you need for a flawless look, bundled together for maximum savings.',
     image: '/insight_combo_offer.png',
     mrp: 1163,
-    price: 814,
+    price: 885,
     route: '/product/e1f8c14a-5f6b-4e1a-8c1d-9e2f3a4b5c6d',
     accent: '#e95578',
     accentDark: '#c2185b',
