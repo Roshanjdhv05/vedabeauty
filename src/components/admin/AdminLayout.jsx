@@ -12,7 +12,8 @@ import {
   TrendingUp,
   MessageSquare,
   Image as ImageIcon,
-  Tag
+  Tag,
+  Undo2
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -27,6 +28,7 @@ const AdminLayout = ({ children }) => {
     { name: 'Orders', icon: <ShoppingCart size={20} />, path: '/admin/orders' },
     { name: 'Categories Banner', icon: <ImageIcon size={20} />, path: '/admin/category-images' },
     { name: 'Promo Codes', icon: <Tag size={20} />, path: '/admin/promo-codes' },
+    { name: 'Returns', icon: <Undo2 size={20} />, path: '/admin/returns' },
     { name: 'Customers', icon: <Users size={20} />, path: '/admin/customers' },
     { name: 'Messages', icon: <MessageSquare size={20} />, path: '/admin/messages' },
   ];

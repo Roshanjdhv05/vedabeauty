@@ -13,12 +13,6 @@ const HeroSection = () => {
 
   const slides = [
     {
-      desktopSrc: '/hero_slide1.jpg',
-      mobileSrc: '/phone%20screen%20posters/pster%20(1).png',
-      alt: 'Your Favorite Beauty Brands, All in One Place',
-      onClick: () => document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth' }),
-    },
-    {
       desktopSrc: '/hero_slide2.jpg',
       mobileSrc: '/phone%20screen%20posters/pster(2).png',
       alt: 'Special Combo Offers - Handpicked combos from top brands up to 30% off',
@@ -28,6 +22,12 @@ const HeroSection = () => {
       desktopSrc: '/hero_slide3.jpg',
       mobileSrc: '/phone%20screen%20posters/offer.png',
       alt: 'Fast Global Dispatch & 24 Hours Priority Shipping',
+      onClick: () => document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth' }),
+    },
+    {
+      desktopSrc: '/hero_slide1.jpg',
+      mobileSrc: '/phone%20screen%20posters/pster%20(1).png',
+      alt: 'Your Favorite Beauty Brands, All in One Place',
       onClick: () => document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth' }),
     },
   ];

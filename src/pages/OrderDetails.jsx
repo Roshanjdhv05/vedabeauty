@@ -11,7 +11,8 @@ import {
   Clock,
   Truck,
   Phone,
-  RotateCcw
+  RotateCcw,
+  Undo2
 } from 'lucide-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -255,18 +256,30 @@ const OrderDetails = () => {
         </div>
 
         {/* F. Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 pb-8">
-           <button 
-             onClick={() => navigate(`/order/${id}/invoice`)}
-             className="py-4 bg-[#DB2777] text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-pink-100"
-           >
-              <FileText size={16} />
-              View Invoice
-           </button>
-           <button className="py-4 bg-[#F8C8DC]/20 text-[#F8C8DC] text-[10px] font-bold uppercase tracking-[0.2em] rounded-2xl hover:bg-[#F8C8DC] hover:text-white transition-all flex items-center justify-center gap-3 active:scale-95">
-              <RotateCcw size={16} />
-              Reorder
-           </button>
+        <div className="space-y-3 pb-8">
+           <div className="grid grid-cols-2 gap-3">
+             <button 
+               onClick={() => navigate(`/order/${id}/invoice`)}
+               className="py-4 bg-[#DB2777] text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-pink-100"
+             >
+                <FileText size={16} />
+                View Invoice
+             </button>
+             <button className="py-4 bg-[#F8C8DC]/20 text-[#F8C8DC] text-[10px] font-bold uppercase tracking-[0.2em] rounded-2xl hover:bg-[#F8C8DC] hover:text-white transition-all flex items-center justify-center gap-3 active:scale-95">
+                <RotateCcw size={16} />
+                Reorder
+             </button>
+           </div>
+           
+           {(order.status === 'delivered' || order.status === 'Delivered') && (
+             <button 
+               onClick={() => navigate(`/order/${id}/return`)}
+               className="w-full py-4 bg-white border-2 border-red-100 text-red-500 text-[10px] font-bold uppercase tracking-[0.2em] rounded-2xl hover:bg-red-50 transition-all flex items-center justify-center gap-3 active:scale-95"
+             >
+                <Undo2 size={16} />
+                Request Return / Replacement
+             </button>
+           )}
         </div>
 
       </div>

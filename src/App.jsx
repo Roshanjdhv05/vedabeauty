@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
+import ReturnOrderPage from './pages/ReturnOrderPage';
 import DealsPage from './pages/DealsPage';
 import CategoryPage from './pages/CategoryPage';
 import CategoryResults from './pages/CategoryResults';
@@ -37,6 +38,7 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminCategoryImages from './pages/admin/AdminCategoryImages';
 import AdminPromoCodes from './pages/admin/AdminPromoCodes';
 import AdminLimitedOffers from './pages/admin/AdminLimitedOffers';
+import AdminReturns from './pages/admin/AdminReturns';
 import LimitedOfferPage from './pages/LimitedOfferPage';
 
 const AppContent = () => {
@@ -68,6 +70,7 @@ const AppContent = () => {
           <Route path="/admin/category-images" element={<AdminCategoryImages />} />
           <Route path="/admin/promo-codes" element={<AdminPromoCodes />} />
           <Route path="/admin/limited-offers" element={<AdminLimitedOffers />} />
+          <Route path="/admin/returns" element={<AdminReturns />} />
         </Routes>
       </AdminLayout>
     );
@@ -97,6 +100,7 @@ const AppContent = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/order/:id/return" element={<ReturnOrderPage />} />
         <Route path="/deals" element={<DealsPage />} />
         <Route path="/categories" element={<CategoryPage />} />
         <Route path="/category/:categoryName" element={<CategoryResults />} />
