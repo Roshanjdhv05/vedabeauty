@@ -26,6 +26,7 @@ import ResetPassword from './pages/ResetPassword';
 import OffersPage from './pages/OffersPage';
 import PWAInstallBanner from './components/layout/PWAInstallBanner';
 import IOSInstallPrompt from './components/layout/IOSInstallPrompt';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Admin Imports
 import AdminLayout from './components/admin/AdminLayout';
@@ -103,6 +104,7 @@ const AppContent = () => {
         <Route path="/brand/:brandId/category/:categoryName" element={<BrandCategoryPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/brands" element={<BrandsPage />} />
         <Route path="/offers" element={<OffersPage />} />
         <Route path="/limited-offers/:id" element={<LimitedOfferPage />} />

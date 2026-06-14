@@ -12,7 +12,7 @@ const BottomNavigation = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 pb-safe shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
       <div className="flex justify-around items-center h-16 px-2">
         {navItems.map((item) => (
           <NavLink
@@ -20,7 +20,7 @@ const BottomNavigation = () => {
             to={item.path}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
-                isActive ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-gray-900'
+                isActive ? 'text-[#D4AF37]' : 'text-white/70 hover:text-white'
               }`
             }
           >

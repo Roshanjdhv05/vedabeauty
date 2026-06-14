@@ -12,84 +12,57 @@ export const CartProvider = ({ children }) => {
   // Synchronize Cart on Auth State Change
   useEffect(() => {
     const syncCart = async () => {
+      setLoading(true);
+      
+      // Load local cart first for immediate fallback
+      const localCart = localStorage.getItem('veda_cart');
+      let parsedLocal = [];
+      if (localCart) {
+        try {
+          const parsed = JSON.parse(localCart);
+          if (Array.isArray(parsed)) parsedLocal = parsed;
+        } catch (e) {
+          console.error("Corrupted local cart data:", e);
+        }
+      }
+
       if (user) {
-        setLoading(true);
         // 1. Fetch current DB cart
         const dbItems = await getCartItems(user.id);
         
-        // 2. Check for local guest items to merge
-        const localCart = localStorage.getItem('veda_cart');
-        if (localCart) {
-          try {
-            const guestItems = JSON.parse(localCart);
-            if (Array.isArray(guestItems) && guestItems.length > 0) {
-              // Merge guest items into DB
-              for (const item of guestItems) {
-                const existingInDB = dbItems.find(dbi => 
-                  dbi.product_id === item.id && dbi.variant_id === item.variant_id
-                );
-                const newQuantity = existingInDB ? existingInDB.quantity + item.quantity : item.quantity;
-                await addToDBCart(user.id, item.id, newQuantity, item.variant_id);
-              }
-              // Clear local storage after successful merge
-              localStorage.removeItem('veda_cart');
-              // Refresh DB items after merge
-              const updatedDBItems = await getCartItems(user.id);
-              setCart(updatedDBItems.map(item => ({ 
-                ...(item.products || {}), 
-                quantity: item.quantity,
-                variant_id: item.variant_id,
-                variant: item.product_variants
-              })));
-            } else {
-              setCart(dbItems.map(item => ({ 
-                ...(item.products || {}), 
-                quantity: item.quantity,
-                variant_id: item.variant_id,
-                variant: item.product_variants
-              })));
-            }
-          } catch (e) {
-            console.error("Failed to parse local cart:", e);
-            setCart(dbItems.map(item => ({ 
-              ...(item.products || {}), 
-              quantity: item.quantity,
-              variant_id: item.variant_id,
-              variant: item.product_variants
-            })));
-          }
+        if (dbItems && dbItems.length > 0) {
+           // Trust DB if it has items
+           const mappedDB = dbItems.map(item => ({ 
+             ...(item.products || {}), 
+             quantity: item.quantity,
+             variant_id: item.variant_id,
+             variant: item.product_variants
+           }));
+           setCart(mappedDB);
+        } else if (parsedLocal.length > 0) {
+           // DB is empty or failed, fallback to local storage
+           setCart(parsedLocal);
+           // Attempt to sync these back to DB silently
+           parsedLocal.forEach(item => {
+             addToDBCart(user.id, item.id, item.quantity, item.variant_id).catch(() => {});
+           });
         } else {
-          setCart(dbItems.map(item => ({ 
-            ...(item.products || {}), 
-            quantity: item.quantity,
-            variant_id: item.variant_id,
-            variant: item.product_variants
-          })));
+           setCart([]);
         }
-        setLoading(false);
       } else {
-        // Load from localStorage for guest
-        const savedCart = localStorage.getItem('veda_cart');
-        if (savedCart) {
-          try {
-            const parsed = JSON.parse(savedCart);
-            if (Array.isArray(parsed)) setCart(parsed);
-          } catch (e) {
-            console.error("Corrupted local cart data:", e);
-            localStorage.removeItem('veda_cart');
-          }
-        }
+        // Guest mode
+        if (parsedLocal.length > 0) setCart(parsedLocal);
       }
+      setLoading(false);
     };
+    
     syncCart();
   }, [user]);
 
-  // Persist Guest Cart to localStorage
+  // Persist Cart to localStorage
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('veda_cart', JSON.stringify(cart));
-    }
-  }, [cart, user]);
+    localStorage.setItem('veda_cart', JSON.stringify(cart));
+  }, [cart]);
 
   const addToCart = async (product, variantId = null, variant = null) => {
     // Guard: if user is not logged in, redirect to login page
@@ -139,6 +112,7 @@ export const CartProvider = ({ children }) => {
       if (error) return;
     }
     setCart([]);
+    localStorage.removeItem('veda_cart');
   };
 
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);

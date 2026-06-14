@@ -8,6 +8,7 @@ import { createOrder } from '../services/orderService';
 import { getCartItemImageCandidates, FALLBACK_IMAGE } from '../lib/imageResolver';
 import SmartProductImage from '../components/ui/SmartProductImage';
 import { supabase } from '../lib/supabase';
+import { openRazorpayCheckout } from '../utils/razorpay';
 
 const CartPage = () => {
   const { cart, removeFromCart, cartTotal, addToCart, clearCart } = useCart();
@@ -17,6 +18,7 @@ const CartPage = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
   
   const [customerName, setCustomerName] = useState('');
   const [phoneCountry, setPhoneCountry] = useState({ code: '+91', digits: 10, label: '🇮🇳 India +91' });
@@ -72,12 +74,27 @@ const CartPage = () => {
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [promoError, setPromoError] = useState('');
 
-  const discountAmount = appliedPromo ? Math.round(cartTotal * (appliedPromo.discount_percentage / 100)) : 0;
+  const eligibleTotal = cart.reduce((total, item) => {
+    // A product is considered on offer if it's explicitly marked or has a discount
+    const isOffer = item.is_offer === true || (item.discount && item.discount > 0);
+    if (!isOffer) {
+      const itemPrice = item.variant?.price || item.price;
+      return total + (itemPrice * item.quantity);
+    }
+    return total;
+  }, 0);
+
+  const discountAmount = appliedPromo ? Math.round(eligibleTotal * (appliedPromo.discount_percentage / 100)) : 0;
 
   const handleApplyPromo = async () => {
     if (!promoInput.trim()) return;
     if (!user) {
       setPromoError('Please login to apply promo codes');
+      return;
+    }
+
+    if (eligibleTotal === 0) {
+      setPromoError('Promo codes cannot be applied to products already on offer');
       return;
     }
 
@@ -134,45 +151,64 @@ const CartPage = () => {
     const shippingFee = cartTotal < 500 ? 60 : 0;
     const totalAmount = cartTotal - discountAmount + shippingFee;
     const itemsCount = cart.reduce((total, item) => total + item.quantity, 0);
-    
-    const orderData = {
-      user_id: user.id,
-      customer_name: customerName.trim() || user.email.split('@')[0],
-      phone: `${phoneCountry.code}${phoneNumber}`,
-      total_amount: totalAmount,
-      profit_amount: Math.round(totalAmount * 0.15),
-      items_count: itemsCount,
-      address_line1: address.line1,
-      address_line2: address.line2,
-      landmark: address.landmark,
-      pincode: address.pincode,
-      city: address.city,
-      state: address.state,
-      items: cart,
-      shipping_fee: cartTotal < 500 ? 60 : 0,
-      promo_code_id: appliedPromo ? appliedPromo.id : null,
-      discount_amount: discountAmount || 0
+
+    const userDetails = {
+      name: customerName.trim() || user.email.split('@')[0],
+      email: user.email,
+      contact: `${phoneCountry.code}${phoneNumber}`
     };
 
-    const { error } = await createOrder(orderData);
-    
-    if (error) {
-      console.error('Checkout Error:', error);
-      alert(`Failed to place order: ${error.message || 'Check your connection'}`);
-      setIsSubmitting(false);
-      return;
-    }
+    openRazorpayCheckout(
+      totalAmount,
+      userDetails,
+      async (paymentResponse) => {
+        // Payment successful, now create the order
+        const orderData = {
+          user_id: user.id,
+          customer_name: userDetails.name,
+          phone: userDetails.contact,
+          total_amount: totalAmount,
+          profit_amount: Math.round(totalAmount * 0.15),
+          items_count: itemsCount,
+          address_line1: address.line1,
+          address_line2: address.line2,
+          landmark: address.landmark,
+          pincode: address.pincode,
+          city: address.city,
+          state: address.state,
+          items: cart,
+          shipping_fee: shippingFee,
+          promo_code_id: appliedPromo ? appliedPromo.id : null,
+          discount_amount: discountAmount || 0,
+          payment_id: paymentResponse.razorpay_payment_id
+        };
 
-    if (appliedPromo) {
-      await supabase.from('promo_code_usages').insert([{
-        promo_code_id: appliedPromo.id,
-        user_email: user.email
-      }]);
-    }
+        const { error } = await createOrder(orderData);
+        
+        if (error) {
+          console.error('Checkout Error:', error);
+          setPaymentError(`Payment was successful but failed to save order: ${error.message || 'Contact support'}`);
+          setIsSubmitting(false);
+          return;
+        }
 
-    setOrderSuccess(true);
-    clearCart();
-    setIsSubmitting(false);
+        if (appliedPromo) {
+          await supabase.from('promo_code_usages').insert([{
+            promo_code_id: appliedPromo.id,
+            user_email: user.email
+          }]);
+        }
+
+        setOrderSuccess(true);
+        clearCart();
+        setIsSubmitting(false);
+      },
+      (error) => {
+        // Payment failed
+        setPaymentError(error.description || 'Payment failed. Please try again.');
+        setIsSubmitting(false);
+      }
+    );
   };
 
   if (orderSuccess) {
@@ -576,6 +612,38 @@ const CartPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Error Modal */}
+      <AnimatePresence>
+        {paymentError && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative"
+            >
+              <button 
+                onClick={() => setPaymentError(null)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
+              >
+                <X size={20} />
+              </button>
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <X className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">Payment Failed</h3>
+              <p className="text-gray-500 mb-6 text-sm leading-relaxed">{paymentError}</p>
+              <button 
+                onClick={() => setPaymentError(null)}
+                className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-accent hover:text-black transition-all"
+              >
+                Try Again
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

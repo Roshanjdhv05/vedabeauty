@@ -38,6 +38,7 @@ const ShopByBrand = () => {
             ) : (
               brands.map((brand) => {
                 const isMars = brand.name.toUpperCase().includes('MARS');
+                const isVega = brand.name.toUpperCase().includes('VEGA');
                 const hasCustomLogo = brand.logo_url && brand.logo_url !== '/brands/default_logo.png';
                 
                 return (
@@ -48,13 +49,19 @@ const ShopByBrand = () => {
                     className="flex-shrink-0 flex flex-col items-center gap-6 group cursor-pointer"
                   >
                     <div className={`relative w-28 h-28 md:w-36 md:h-36 flex items-center justify-center transition-all duration-500 group-hover:scale-110 flex-shrink-0 shadow-[0_8px_25px_rgba(0,0,0,0.05)] ${
-                      hasCustomLogo 
+                      isVega || hasCustomLogo
                         ? 'rounded-full border-[1.5px] border-[#E8B4C0] bg-white overflow-hidden p-2' 
                         : isMars 
                           ? 'bg-black rounded-2xl p-4' 
                           : 'rounded-full border-[1.5px] border-[#E8B4C0] bg-[#FDEEF4] p-4'
                     }`}>
-                      {hasCustomLogo ? (
+                      {isVega ? (
+                        <img
+                          src="/brands/vega.jfif"
+                          alt={brand.name}
+                          className="w-full h-full object-contain rounded-full"
+                        />
+                      ) : hasCustomLogo ? (
                         <OptimizedImage 
                           src={brand.logo_url} 
                           alt={brand.name} 

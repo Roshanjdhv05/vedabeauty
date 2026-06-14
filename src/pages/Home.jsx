@@ -118,13 +118,30 @@ const Home = () => {
     document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  // 5. Categorize products for Home sections
-  const trendingProducts = allProducts.slice(0, 12); // First 12 for now
-  const luxuryProducts = allProducts.filter(p => p.price > 999).slice(0, 20);
-  const valueProducts = allProducts
-    .filter(p => p.price < 599)
-    .sort((a, b) => a.price - b.price)
-    .slice(0, 20);
+  // --- Beauty-focused product selectors ---
+  const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+  const matchesKeywords = (product, keywords) => {
+    const text = `${product.name || ''} ${product.category || ''} ${product.subcategory || ''}`.toLowerCase();
+    return keywords.some(kw => text.includes(kw));
+  };
+
+  const beautyFirst = (products, keywords, limit) => {
+    const matched = shuffle(products.filter(p => matchesKeywords(p, keywords)));
+    const rest = shuffle(products.filter(p => !matchesKeywords(p, keywords)));
+    return [...matched, ...rest].slice(0, limit);
+  };
+
+  const lipKeywords = ['lip', 'lipstick', 'gloss', 'lip color', 'lip tint', 'lip butter', 'lip cream', 'lip oil', 'lip mud', 'lip liner', 'matte lip', 'lip ink'];
+  const eyeKeywords = ['eye', 'kajal', 'kohl', 'eyeliner', 'mascara', 'eyeshadow', 'eye ink', 'eye pencil', 'eye liner', 'lash', 'brow', 'eye shadow'];
+  const faceKeywords = ['foundation', 'concealer', 'blush', 'highlighter', 'contour', 'primer', 'powder', 'bb cream', 'cc cream', 'compact', 'setting', 'base', 'face', 'serum foundation', 'skin touch'];
+  const allBeautyKeywords = [...lipKeywords, ...eyeKeywords, ...faceKeywords];
+
+  const trendingProducts = beautyFirst(allProducts, allBeautyKeywords, 16);
+  const lipProducts = beautyFirst(allProducts, lipKeywords, 16);
+  const eyeProducts = beautyFirst(allProducts, eyeKeywords, 16);
+  const luxuryProducts = beautyFirst(allProducts.filter(p => p.price > 999), allBeautyKeywords, 20);
+  const valueProducts = beautyFirst(allProducts.filter(p => p.price < 599), allBeautyKeywords, 20);
 
   return (
     <div className="w-full max-w-full overflow-x-hidden flex flex-col gap-0 min-h-screen bg-background">
@@ -147,21 +164,21 @@ const Home = () => {
       {/* 4. SHOP BY BRAND */}
       <ShopByBrand />
 
-      {/* 4. OFFER SECTION */}
+      {/* 5. OFFER SECTION */}
       <OfferSection />
 
-      {/* 5. VALUE FOR MONEY SECTION */}
+      {/* 6. VALUE FOR MONEY SECTION */}
       <ValueForMoney />
 
-      {/* 5. FEATURED SECTIONS */}
+      {/* 7. FEATURED SECTIONS */}
       <div className="space-y-16 py-10 bg-background">
-        {/* Trending Section */}
+        {/* Trending Beauty Picks */}
         {trendingProducts.length > 0 && (
           <div className="w-full">
             <div className="max-w-7xl mx-auto px-4 flex justify-between items-end mb-6">
                <div>
-                 <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Trending Products</h2>
-                 <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Professional Picks & Best Rated</p>
+                 <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Trending Beauty Picks</h2>
+                 <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Bestsellers in Lips, Eyes & Face</p>
                </div>
             </div>
             {loading ? (
@@ -174,6 +191,48 @@ const Home = () => {
               </div>
             ) : (
               <ProductSection products={trendingProducts} />
+            )}
+          </div>
+        )}
+
+        {/* Lip Essentials */}
+        {lipProducts.length > 0 && (
+          <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 mb-6">
+               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Lip Essentials</h2>
+               <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Lipsticks · Glosses · Lip Tints & More</p>
+            </div>
+            {loading ? (
+              <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex gap-4 pb-8 w-max px-4">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="w-[160px] md:w-[280px] aspect-[3/4] bg-white/10 animate-pulse rounded-2xl flex-shrink-0" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ProductSection products={lipProducts} />
+            )}
+          </div>
+        )}
+
+        {/* Eye Makeup */}
+        {eyeProducts.length > 0 && (
+          <div className="w-full">
+            <div className="max-w-7xl mx-auto px-4 mb-6">
+               <h2 className="text-2xl md:text-4xl font-serif font-bold text-black uppercase tracking-tight">Eye Makeup</h2>
+               <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Kajal · Eyeliners · Mascaras · Eyeshadows</p>
+            </div>
+            {loading ? (
+              <div className="overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex gap-4 pb-8 w-max px-4">
+                  {[1,2,3,4,5,6,7,8].map(i => (
+                    <div key={i} className="w-[160px] md:w-[280px] aspect-[3/4] bg-white/10 animate-pulse rounded-2xl flex-shrink-0" />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <ProductSection products={eyeProducts} />
             )}
           </div>
         )}
